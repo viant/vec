@@ -1,0 +1,64 @@
+TEXT ·_add_scalar(SB), $0-32
+
+	MOVD input+0(FP),  R0
+	MOVD output+8(FP), R1
+	MOVD value+16(FP), R2
+	MOVD size+24(FP),  R3
+                      //
+  WORD $0xd342fc68		// LSR $2, R3, R8
+  WORD $0x7100051f		// CMPW $1, R8
+  WORD $0x5400014b		// BLT 10(PC)
+  WORD $0x4e040c40		// VDUP R2, V0.S4
+  WORD $0xd3428468		// UBFX $2, R3, $32, R8
+  WORD $0xaa0003e9		// MOVD R0, R9
+  WORD $0xaa0103ea		// MOVD R1, R10
+  WORD $0x3cc10521		// MOVD.P 16(R9), V1
+  WORD $0xf1000508		// SUBS $1, R8, R8
+  WORD $0x4ea08421		// VADD V0.S4, V1.S4, V1.S4
+  WORD $0x3c810541		// MOVD.P V1, 16(R10)
+  WORD $0x54ffff81		// BNE -4(PC)
+  WORD $0x93407c6a		// SXTW R3, R10
+  WORD $0x927ef548		// AND $-4, R10, R8
+  WORD $0xeb03011f		// CMP R3, R8
+  WORD $0x54000522		// BCS 41(PC)
+  WORD $0xcb080069		// SUB R8, R3, R9
+  WORD $0xf1001d3f		// CMP $7, R9
+  WORD $0x540003a9		// BLS 29(PC)
+  WORD $0xd37ef54b		// LSL $2, R10, R11
+  WORD $0xd37ef46a		// LSL $2, R3, R10
+  WORD $0x927ced6b		// AND $-16, R11, R11
+  WORD $0x8b0b002c		// ADD R11, R1, R12
+  WORD $0x8b0a000d		// ADD R10, R0, R13
+  WORD $0xeb0c01bf		// CMP R12, R13
+  WORD $0x540000a9		// BLS 5(PC)
+  WORD $0x8b0a002a		// ADD R10, R1, R10
+  WORD $0x8b0b000c		// ADD R11, R0, R12
+  WORD $0xeb0c015f		// CMP R12, R10
+  WORD $0x54000248		// BHI 18(PC)
+  WORD $0x927df12a		// AND $-8, R9, R10
+  WORD $0x9100416c		// ADD $16, R11, R12
+  WORD $0x4e040c40		// VDUP R2, V0.S4
+  WORD $0x8b0a0108		// ADD R10, R8, R8
+  WORD $0x8b0c002b		// ADD R12, R1, R11
+  WORD $0x8b0c000c		// ADD R12, R0, R12
+  WORD $0xaa0a03ed		// MOVD R10, R13
+  WORD $0xad7f8981		// LDP -16(R12), (V1, V2)
+  WORD $0xf10021ad		// SUBS $8, R13, R13
+  WORD $0x9100818c		// ADD $32, R12, R12
+  WORD $0x4ea08421		// VADD V0.S4, V1.S4, V1.S4
+  WORD $0x4ea08442		// VADD V0.S4, V2.S4, V2.S4
+  WORD $0xad3f8961		// STP (V1, V2), -16(R11)
+  WORD $0x9100816b		// ADD $32, R11, R11
+  WORD $0x54ffff21		// BNE -7(PC)
+  WORD $0xeb0a013f		// CMP R10, R9
+  WORD $0x54000140		// BEQ 10(PC)
+  WORD $0xd37ef50a		// LSL $2, R8, R10
+  WORD $0x8b0a0029		// ADD R10, R1, R9
+  WORD $0x8b0a000a		// ADD R10, R0, R10
+  WORD $0xcb080068		// SUB R8, R3, R8
+  WORD $0xb840454b		// MOVWU.P 4(R10), R11
+  WORD $0xf1000508		// SUBS $1, R8, R8
+  WORD $0x0b02016b		// ADDW R2, R11, R11
+  WORD $0xb800452b		// MOVW.P R11, 4(R9)
+  WORD $0x54ffff81		// BNE -4(PC)
+  WORD $0xd65f03c0		// RET

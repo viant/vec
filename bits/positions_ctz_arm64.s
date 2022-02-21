@@ -1,0 +1,24 @@
+TEXT ·_populate_positions_ctz(SB), $0-32
+  MOVD input+0(FP),  R0
+  MOVD out+8(FP), R1
+  MOVD count+16(FP), R2
+
+  WORD $0xb4000200	// 	CBZ R0, 16(PC)
+  WORD $0x9e670000	// 	FMOVD R0, F0
+  WORD $0x0e205800	// 	VCNT V0.B8, V0.B8
+  WORD $0x2e303800	// 	VUADDLV V0.B8, V0
+  WORD $0x1e260008	// 	FMOVS F0, R8
+  WORD $0x91000509	// 	ADD $1, R8, R9
+  WORD $0xdac0000a	// 	RBIT R0, R10
+  WORD $0xd100040b	// 	SUB $1, R0, R11
+  WORD $0xd1000529	// 	SUB $1, R9, R9
+  WORD $0xdac0114a	// 	CLZ R10, R10
+  WORD $0xf100053f	// 	CMP $1, R9
+  WORD $0xb800442a	// 	MOVW.P R10, 4(R1)
+  WORD $0x8a000160	// 	AND R0, R11, R0
+  WORD $0x54ffff2c	// 	BGT -7(PC)
+  WORD $0xb9000048	// 	MOVW R8, (R2)
+  WORD $0xd65f03c0	// 	RET
+  WORD $0x2a1f03e8	// 	MOVW ZR, R8
+  WORD $0xb9000048	// 	MOVW R8, (R2)
+  WORD $0xd65f03c0	// 	RET
