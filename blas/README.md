@@ -29,13 +29,6 @@ func ExampleInt32_Add() {
 ```
 
 ### Benchmarks
-
-The benchmark uses 3 sets of []uints
-**S**mall -  [8]uint64
-**M**edium - [32]uint64
-**XL**arge - [128]uint64
-
-
 #### ARM64 (Neon)
 
 ```text
