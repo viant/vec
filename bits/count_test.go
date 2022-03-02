@@ -68,14 +68,14 @@ func TestCount(t *testing.T) {
 	}
 }
 
-func BenchmarkCountOptimized(b *testing.B) {
+func BenchmarkCountNaive(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Count(d)
+		count(d)
 	}
 }
 
-func BenchmarkNaiveCount(b *testing.B) {
+func BenchmarkCount(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		count(d)
+		Count(d)
 	}
 }
