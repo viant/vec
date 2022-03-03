@@ -82,16 +82,16 @@ func init() {
 
 }
 
-func Benchmark_Lookup(b *testing.B) {
+func Benchmark_Lookup_Naive(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		Lookup(bmInput, bmTable, &bmOutput)
+		lookup(bmInput, bmTable, &bmOutput)
 	}
 	assert.EqualValues(b, bmExpect, bmOutput)
 }
 
-func Benchmark_Lookup_Naive(b *testing.B) {
+func Benchmark_Lookup(b *testing.B) {
 	for i := 0; i < b.N; i++ {
-		lookup(bmInput, bmTable, &bmOutput)
+		Lookup(bmInput, bmTable, &bmOutput)
 	}
 	assert.EqualValues(b, bmExpect, bmOutput)
 }
