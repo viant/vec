@@ -23,22 +23,6 @@ func TestShrinkValue(t *testing.T) {
 	assert.EqualValues(t, expectedShrink, shrunkValue, "test")
 }
 
-func BenchmarkShrink(b *testing.B) {
-	b.ReportAllocs()
-	var shrunkValue Uint64 = 0
-	for i := 0; i < b.N; i++ {
-		shrunkValue.Shrink(ints)
-	}
-}
-
-func BenchmarkShrinkValue(b *testing.B) {
-	b.ReportAllocs()
-	var shrunkValue Uint64 = 0
-	for i := 0; i < b.N; i++ {
-		shrunkValue.ShrinkValue(0x80, ints)
-	}
-}
-
 func BenchmarkNaiveShrink(b *testing.B) {
 	var shrunkValue Uint64 = 0
 	b.ReportAllocs()
@@ -47,10 +31,26 @@ func BenchmarkNaiveShrink(b *testing.B) {
 	}
 }
 
+func BenchmarkShrink(b *testing.B) {
+	b.ReportAllocs()
+	var shrunkValue Uint64 = 0
+	for i := 0; i < b.N; i++ {
+		shrunkValue.Shrink(ints)
+	}
+}
+
 func BenchmarkNaiveShrinkValue(b *testing.B) {
 	var shrunkValue Uint64 = 0
 	b.ReportAllocs()
 	for i := 0; i < b.N; i++ {
 		shrunkValue.shrinkValue(0, ints)
+	}
+}
+
+func BenchmarkShrinkValue(b *testing.B) {
+	b.ReportAllocs()
+	var shrunkValue Uint64 = 0
+	for i := 0; i < b.N; i++ {
+		shrunkValue.ShrinkValue(0x80, ints)
 	}
 }
