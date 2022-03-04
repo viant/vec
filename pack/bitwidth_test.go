@@ -14,7 +14,7 @@ func init() {
 }
 
 func TestBitwidth(t *testing.T) {
-	actual := maxBits2(data[:])
+	actual := MaxBits(data[:])
 	assert.EqualValues(t, 7, actual, "TestBitwidth")
 }
 

@@ -23,10 +23,10 @@ func TestTurboUnpackBits(t *testing.T) {
 
 	bits := MaxBits(data)
 	packedData := Uint32s(make([]uint32, PackedUint32Count(uint32(len(data)), bits)))
-	packedData.packBits(data, int(bits))
+	packedData.PackBits(data, int(bits))
 
 	unpackedData := make([]uint32, len(data))
-	Uint32s(unpackedData).unpackBits(packedData, int(bits))
+	Uint32s(unpackedData).UnpackBits(packedData, int(bits))
 
 	assert.EqualValues(t, data, unpackedData, "TestPackBits")
 }
