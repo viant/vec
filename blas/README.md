@@ -2,16 +2,21 @@
 
 ### Introduction
 
-####The following operations are implemented using vectors as operands:
-####float32:
+#### The following operations are implemented using vectors as operands:
+
+#### float32:
+
 add, sub, mul, div
+
 #### int32
+
 add, sub, mul,
 
 Also, the "horizontal"/across a single vector the operations below are available for both int32 and float32:
 hsum, hmin, hmax
 
 ### Usage:
+
 #### Vectorized Add
 
 ```go
@@ -20,15 +25,36 @@ package mypkg;
 import "github.com/viant/vec/blas"
 
 func ExampleInt32_Add() {
-		v1 := []int32{1, 2, 3, 4, 5, 6, 7, 8}
-		v2 := []int32{1, 7, 3, 4, 3, 6, 7, 2}
-		out := blas.Int32s(make([]int32, 8))
-		out.AddInt32(v1, v2)
+	v1 := []int32{1, 2, 3, 4, 5, 6, 7, 8}
+	v2 := []int32{1, 7, 3, 4, 3, 6, 7, 2}
+	out := blas.Int32s(make([]int32, 8))
+	out.AddInt32(v1, v2)
+}
+
+
+```
+
+#### Vectorized Horizontal Sum
+
+```go
+package mypkg;
+
+import (
+	"fmt"
+	"github.com/viant/vec/blas"
+)
+
+func ExampleInt32_HSum() {
+	var data = make([]float32, 1000)
+	//...
+	sum := blas.HsumFloat32(data)
+	fmt.Println(sum)
 }
 
 ```
 
 ### Benchmarks
+
 #### ARM64 (Neon)
 
 ```text
@@ -61,7 +87,6 @@ BenchmarkSubInt32-16            	39963598	        29.96 ns/op
 BenchmarkMulInt32Naive-16       	 6028239	       199.1 ns/op
 BenchmarkMulInt32-16            	38536497	        31.13 ns/op
 ```
-
 
 ### AMD64 (AVX2)
 
