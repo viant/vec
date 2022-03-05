@@ -17,18 +17,18 @@ func TestExpand(t *testing.T) {
 	assert.EqualValues(t, Uint64s(expectedExpansion), out, "test")
 }
 
-func BenchmarkExpand(b *testing.B) {
-	b.ReportAllocs()
-	out := Uint64s(make([]uint64, 8))
-	for i := 0; i < b.N; i++ {
-		out.Expand(shrunkValue)
-	}
-}
-
 func BenchmarkNaiveExpand(b *testing.B) {
 	b.ReportAllocs()
 	out := Uint64s(make([]uint64, 8))
 	for i := 0; i < b.N; i++ {
 		out.expand(shrunkValue)
+	}
+}
+
+func BenchmarkExpand(b *testing.B) {
+	b.ReportAllocs()
+	out := Uint64s(make([]uint64, 8))
+	for i := 0; i < b.N; i++ {
+		out.Expand(shrunkValue)
 	}
 }

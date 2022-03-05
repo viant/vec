@@ -42,6 +42,14 @@ func BenchmarkDeltasNaive(b *testing.B) {
 		deltas.deltas(deltaData[:])
 	}
 }
+
+func BenchmarkDeltas(b *testing.B) {
+	deltas := Int32s(make([]int32, len(deltaData)))
+	for i := 0; i < b.N; i++ {
+		deltas.Deltas(deltaData[:])
+	}
+}
+
 func BenchmarkRecoverDeltasNaive(b *testing.B) {
 	deltas := Int32s(make([]int32, len(deltaData)))
 	deltas.Deltas(deltaData[:])
@@ -51,12 +59,6 @@ func BenchmarkRecoverDeltasNaive(b *testing.B) {
 	}
 }
 
-func BenchmarkDeltas(b *testing.B) {
-	deltas := Int32s(make([]int32, len(deltaData)))
-	for i := 0; i < b.N; i++ {
-		deltas.Deltas(deltaData[:])
-	}
-}
 func BenchmarkRecoverDeltas(b *testing.B) {
 	deltas := Int32s(make([]int32, len(deltaData)))
 	deltas.Deltas(deltaData[:])
