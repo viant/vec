@@ -35,13 +35,13 @@ inline void and_sisd(uint64_t *out, const uint64_t *v1, const uint64_t *v2, uint
 inline void _and_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32_t size) {
     uint32_t chunks = size / 4;
     uint32_t offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_and_si256(v1[i], v2[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_and_si256(v1[i], v2[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -55,13 +55,13 @@ inline void _and_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32
 inline void _and_avx512(__m512i *out, const __m512i *v1, const __m512i *v2, uint32_t size)  {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_and_si512(v1[i], v2[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_and_si512(v1[i], v2[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
@@ -105,14 +105,14 @@ inline void and_v3_sisd(uint64_t* out, const uint64_t* v1, const uint64_t* v2, c
 inline void _and_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, const __m256i *v3, uint32_t size) {
     int chunks = size / 4;
     int offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_and_si256(v1[i], v2[i]);
-            res = _mm256_and_si256(res, v3[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_and_si256(v1[i], v2[i]);
+//            res = _mm256_and_si256(res, v3[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -128,14 +128,14 @@ inline void _and_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, con
 inline void _and_v3_avx512(__m512i *out,  const __m512i *v1, const  __m512i *v2, const __m512i *v3, uint32_t size) {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_and_si512(v1[i], v2[i]);
-            res = _mm512_and_si512(res, v3[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_and_si512(v1[i], v2[i]);
+//            res = _mm512_and_si512(res, v3[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
@@ -201,13 +201,13 @@ inline void or_sisd(uint64_t *out, const uint64_t *v1, const uint64_t *v2, uint3
 inline void _or_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32_t size) {
     uint32_t chunks = size / 4;
     uint32_t offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_or_si256(v1[i], v2[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_or_si256(v1[i], v2[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -221,13 +221,13 @@ inline void _or_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32_
 inline void _or_avx512(__m512i *out, const __m512i *v1, const __m512i *v2, uint32_t size)  {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_or_si512(v1[i], v2[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_or_si512(v1[i], v2[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
@@ -267,14 +267,14 @@ inline void or_v3_sisd(uint64_t* out, const uint64_t* v1, const uint64_t* v2, co
 inline void _or_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, const __m256i *v3, uint32_t size) {
     int chunks = size / 4;
     int offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_or_si256(v1[i], v2[i]);
-            res = _mm256_or_si256(res, v3[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_or_si256(v1[i], v2[i]);
+//            res = _mm256_or_si256(res, v3[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -290,14 +290,14 @@ inline void _or_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, cons
 inline void _or_v3_avx512(__m512i *out,  const __m512i *v1, const  __m512i *v2, const __m512i *v3, uint32_t size) {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_or_si512(v1[i], v2[i]);
-            res = _mm512_or_si512(res, v3[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_or_si512(v1[i], v2[i]);
+//            res = _mm512_or_si512(res, v3[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
@@ -366,13 +366,13 @@ inline void xor_sisd(uint64_t *out, const uint64_t *v1, const uint64_t *v2, uint
 inline void _xor_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32_t size) {
     uint32_t chunks = size / 4;
     uint32_t offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_xor_si256(v1[i], v2[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_xor_si256(v1[i], v2[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -386,13 +386,13 @@ inline void _xor_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, uint32
 inline void _xor_avx512(__m512i *out, const __m512i *v1, const __m512i *v2, uint32_t size)  {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_xor_si512(v1[i], v2[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_xor_si512(v1[i], v2[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
@@ -432,14 +432,14 @@ inline void xor_v3_sisd(uint64_t* out, const uint64_t* v1, const uint64_t* v2, c
 inline void _xor_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, const __m256i *v3, uint32_t size) {
     int chunks = size / 4;
     int offset = chunks * 4;
-    if (offset == size) {
-        for (int i = 0; i < chunks; i++) {
-            __m256i res = _mm256_xor_si256(v1[i], v2[i]);
-            res = _mm256_xor_si256(res, v3[i]);
-            _mm256_store_si256(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < chunks; i++) {
+//            __m256i res = _mm256_xor_si256(v1[i], v2[i]);
+//            res = _mm256_xor_si256(res, v3[i]);
+//            _mm256_store_si256(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m256i vec1 = _mm256_loadu_si256(v1+i);
         __m256i vec2 = _mm256_loadu_si256(v2+i);
@@ -455,14 +455,14 @@ inline void _xor_v3_avx2(__m256i *out, const __m256i *v1, const __m256i *v2, con
 inline void _xor_v3_avx512(__m512i *out,  const __m512i *v1, const  __m512i *v2, const __m512i *v3, uint32_t size) {
     uint32_t chunks = size / 8;
     uint32_t offset = chunks * 8;
-    if (offset == size) {
-        for (int i = 0; i < size; i++) {
-            __m512i res = _mm512_xor_si512(v1[i], v2[i]);
-            res = _mm512_xor_si512(res, v3[i]);
-            _mm512_store_si512(&out[i], res);
-        }
-        return;
-    }
+//    if (offset == size) {
+//        for (int i = 0; i < size; i++) {
+//            __m512i res = _mm512_xor_si512(v1[i], v2[i]);
+//            res = _mm512_xor_si512(res, v3[i]);
+//            _mm512_store_si512(&out[i], res);
+//        }
+//        return;
+//    }
     for (int i = 0; i < chunks; i++) {
         __m512i vec1 = _mm512_loadu_si512(v1+i);
         __m512i vec2 = _mm512_loadu_si512(v2+i);
