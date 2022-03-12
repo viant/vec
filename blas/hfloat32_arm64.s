@@ -37,7 +37,6 @@ WORD $0xd65f03c0		// RET
 WORD $0x0f000401		// VMOVI $0, V1.S2
 WORD $0x17fffff2		// JMP -14(PC)
 
-
 TEXT ·_hmax_float32(SB), $0-32
 
 	MOVD input+0(FP),   R0
@@ -57,7 +56,7 @@ WORD $0x8b2650e5		// ADD R6.UXTW<<4, R7, R5
 WORD $0x3dc00080		// MOVD (R4), V0
 WORD $0x91004084		// ADD $16, R4, R4
 WORD $0xbd400021		// FMOVS (R1), F1
-WORD $0x6eb0f800		// FMINV V0.S4, F0
+WORD $0x6e30f800		// FMAXV V0.S4, F0
 WORD $0x1e202030		// FCMPES F0, F1
 WORD $0x54000065		// BPL 3(PC)
 WORD $0x1e204001		// FMOVS F0, F1
@@ -79,7 +78,6 @@ WORD $0xbd000020		// FMOVS F0, (R1)
 WORD $0xeb00007f		// CMP R0, R3
 WORD $0x54ffff21		// BNE -7(PC)
 WORD $0xd65f03c0		// RET
-
 
 TEXT ·_hmin_float32(SB), $0-32
 

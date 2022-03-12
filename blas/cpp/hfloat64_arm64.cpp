@@ -1,48 +1,48 @@
 #include <arm_neon.h>
 
-void hsum_float32(float *input, float *result, uint64_t size) {
+void hsum_float64(double *input, double *result, uint64_t size) {
     *result = 0.0;
-    int chunks = size / 4;
+    int chunks = size / 2;
 
     for (int i = 0; i < chunks; i++) {
-        *result += vaddvq_f32(((float32x4_t *) input)[i]);
+        *result += vaddvq_f64(((float64x2_t *) input)[i]);
     }
     // Leftovers
-    for (int i = chunks * 4; i < size; i++) {
+    for (int i = chunks * 2; i < size; i++) {
         *result += input[i];
     }
 }
 
-void hmax_float32(float *input, float *result, uint64_t size) {
+void hmax_float64(double *input, double *result, uint64_t size) {
     *result = input[0];
-    int chunks = size / 4;
+    int chunks = size / 2;
 
     for (int i = 0; i < chunks; i++) {
-        float tmp = vmaxvq_f32(((float32x4_t *) input)[i]);
+        double tmp = vmaxvq_f64(((float64x2_t *) input)[i]);
         if (tmp > *result) {
             *result = tmp;
         }
     }
     // Leftovers
-    for (int i = chunks * 4; i < size; i++) {
+    for (int i = chunks * 2; i < size; i++) {
         if (input[i] > *result) {
             *result = input[i];
         }
     }
 }
 
-void hmin_float32(float *input, float *result, uint64_t size) {
+void hmin_float64(double *input, double *result, uint64_t size) {
     *result = input[0];
-    int chunks = size / 4;
+    int chunks = size / 2;
 
     for (int i = 0; i < chunks; i++) {
-        float tmp = vminvq_f32(((float32x4_t *) input)[i]);
+        double tmp = vminvq_f64(((float64x2_t *) input)[i]);
         if (tmp < *result) {
             *result = tmp;
         }
     }
     // Leftovers
-    for (int i = chunks * 4; i < size; i++) {
+    for (int i = chunks * 2; i < size; i++) {
         if (input[i] < *result) {
             *result = input[i];
         }
