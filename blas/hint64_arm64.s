@@ -1,0 +1,78 @@
+TEXT ·_hsum_int64(SB), $0-32
+
+	MOVD input+0(FP),   R0
+	MOVD result+8(FP),  R1
+	MOVD size+16(FP),   R2
+
+  WORD $0xf900003f		// MOVD ZR, (R1)
+  WORD $0xd341fc45		// LSR $1, R2, R5
+  WORD $0x710000bf		// CMPW $0, R5
+  WORD $0x5400036d		// BLE 27(PC)
+  WORD $0x510004a4		// SUBW $1, R5, R4
+  WORD $0x91004007		// ADD $16, R0, R7
+  WORD $0xaa0003e6		// MOVD R0, R6
+  WORD $0xd2800003		// MOVD $0, R3
+  WORD $0x8b2450e7		// ADD R4.UXTW<<4, R7, R7
+  WORD $0xd503201f		// NOOP
+  WORD $0x3cc104c0		// MOVD.P 16(R6), V0
+  WORD $0x5ef1b800		// VADDP V0.D2, V0
+  WORD $0xeb0600ff		// CMP R6, R7
+  WORD $0x4e083c04		// VMOV V0.D[0], R4
+  WORD $0x8b040063		// ADD R4, R3, R3
+  WORD $0xf9000023		// MOVD R3, (R1)
+  WORD $0x54ffff41		// BNE -6(PC)
+  WORD $0x531f78a4		// LSLW $1, R5, R4
+  WORD $0x93407c84		// SXTW R4, R4
+  WORD $0xeb04005f		// CMP R4, R2
+  WORD $0x54000129		// BLS 9(PC)
+  WORD $0x8b040c04		// ADD R4<<3, R0, R4
+  WORD $0x8b020c00		// ADD R2<<3, R0, R0
+  WORD $0xd503201f		// NOOP
+  WORD $0xf8408485		// MOVD.P 8(R4), R5
+  WORD $0x8b050063		// ADD R5, R3, R3
+  WORD $0xf9000023		// MOVD R3, (R1)
+  WORD $0xeb04001f		// CMP R4, R0
+  WORD $0x54ffff81		// BNE -4(PC)
+  WORD $0xd65f03c0		// RET
+  WORD $0xd2800003		// MOVD $0, R3
+  WORD $0x17fffff2		// JMP -14(PC)
+
+TEXT ·_hmax_int64(SB), $0-32
+
+	MOVD input+0(FP),   R0
+	MOVD result+8(FP),  R1
+	MOVD size+16(FP),   R2
+
+  WORD $0xf9400004		// MOVD (R0), R4
+  WORD $0xf9000024		// MOVD R4, (R1)
+  WORD $0xb4000142		// CBZ R2, 10(PC)
+  WORD $0x8b020c02		// ADD R2<<3, R0, R2
+  WORD $0xf9400003		// MOVD (R0), R3
+  WORD $0x91002000		// ADD $8, R0, R0
+  WORD $0xeb04007f		// CMP R4, R3
+  WORD $0x5400006d		// BLE 3(PC)
+  WORD $0xaa0303e4		// MOVD R3, R4
+  WORD $0xf9000023		// MOVD R3, (R1)
+  WORD $0xeb00005f		// CMP R0, R2
+  WORD $0x54ffff21		// BNE -7(PC)
+  WORD $0xd65f03c0		// RET
+
+TEXT ·_hmin_int64(SB), $0-32
+
+	MOVD input+0(FP),   R0
+	MOVD result+8(FP),  R1
+	MOVD size+16(FP),   R2
+
+  WORD $0xf9400004		// MOVD (R0), R4
+  WORD $0xf9000024		// MOVD R4, (R1)
+  WORD $0xb4000142		// CBZ R2, 10(PC)
+  WORD $0x8b020c02		// ADD R2<<3, R0, R2
+  WORD $0xf9400003		// MOVD (R0), R3
+  WORD $0x91002000		// ADD $8, R0, R0
+  WORD $0xeb04007f		// CMP R4, R3
+  WORD $0x5400006a		// BGE 3(PC)
+  WORD $0xaa0303e4		// MOVD R3, R4
+  WORD $0xf9000023		// MOVD R3, (R1)
+  WORD $0xeb00005f		// CMP R0, R2
+  WORD $0x54ffff21		// BNE -7(PC)
+  WORD $0xd65f03c0		// RET
