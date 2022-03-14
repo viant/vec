@@ -5,16 +5,38 @@
 #### The following operations are implemented using vectors as operands:
 
 #### float32:
-
 add, sub, mul, div
 
+###
 #### int32
-
 add, sub, mul,
 
-Also, the "horizontal"/across a single vector the operations below are available for both int32 and float32:
+###
+#### hfloat32/hint32
+The "horizontal"(across a single vector) operations below are available for both int32 and float32:
+
 hsum, hmin, hmax
 
+###
+#### float64
+add, sub, mul, div
+
+###
+####int64
+amd64: add, sub, mul
+####
+arm64: add, sub only. mul falls back to scalar
+
+###
+####hfloat64
+hsum, hmin, hmax
+
+###
+####hint64
+amd64: hsum requires AVX. hmin and hmax require AVX512, otherwise fall back to scalar ops.
+####
+arm64: hsum.  hmin and hmax fall back to scala ops due to unavailability of vector ops on neon.
+##
 ### Usage:
 
 #### Vectorized Add
