@@ -6,12 +6,16 @@ import (
 	"testing"
 )
 
+var dMsb []uint64
+
+const lMsb = 64
+
 func init() {
-	d = make([]uint64, L1)
-	for i := 0; i < L1-1; i++ {
-		d[i] = 0x000000000000000
+	dMsb = make([]uint64, lMsb)
+	for i := 0; i < lMsb-1; i++ {
+		dMsb[i] = 0x000000000000000
 	}
-	d[L1-1] = 0x8000000000000000
+	dMsb[0] = 0x8000000000000000
 }
 
 func TestMsb(t *testing.T) {
@@ -22,26 +26,25 @@ func TestMsb(t *testing.T) {
 	}{
 		{
 			description: "first test",
-			pos:         4095,
+			pos:         63,
 		},
 	}
 
 	for _, testCase := range testCases {
-		actual := msb(d)
+		actual := Msb(dMsb)
 		fmt.Println(actual)
-		assert.EqualValues(t, testCase.pos, actual, testCase.description)
 		assert.EqualValues(t, testCase.pos, actual, testCase.description)
 	}
 }
 
 func BenchmarkMsbNaive(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		msb(d)
+		msb(dMsb)
 	}
 }
 
 func BenchmarkMsb(b *testing.B) {
 	for n := 0; n < b.N; n++ {
-		Msb(d)
+		Msb(dMsb)
 	}
 }
