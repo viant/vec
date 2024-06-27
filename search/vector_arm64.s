@@ -2,8 +2,8 @@
 
 TEXT ·_magnitude_f32_neon(SB), $0-24
 MOVD input+0(FP),  R0
-MOVD size+16(FP), R1
-MOVD output+24(FP),R2
+MOVD size+8(FP), R1
+MOVD output+16(FP),R2
 WORD 	$0xd342fc28	//	LSR $2, R1, R8
 WORD 	$0x7100051f	//	CMPW $1, R8
 WORD 	$0x540001cb	//	BLT 14(PC)
