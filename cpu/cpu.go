@@ -6,19 +6,25 @@ import (
 
 var tryAVX512 = false
 
-//TryAVX512 would try use AVX512 if cpu support it, AVX512 control is introduced since early CPU with AVX512 slowed down CPU clock
-//resulting in substantially worse overall performance comparing just to AVX2
+// TryAVX512 would try use AVX512 if cpu support it, AVX512 control is introduced since early CPU with AVX512 slowed down CPU clock
+// resulting in substantially worse overall performance comparing just to AVX2
 func TryAVX512(flag bool) {
 	tryAVX512 = flag
 }
 
 var Info = 0
+var hasSVE bool
 
 const (
 	useAVX2   = 1 << 32
 	useAVX512 = 2 << 32
 	useSVE    = 3 << 32
 )
+
+// CanUseSVE returns true if CPU has SVE support
+func CanUseSVE() bool {
+	return hasSVE
+}
 
 func init() {
 
@@ -28,5 +34,6 @@ func init() {
 		Info = useAVX2
 	} else if cpu.ARM64.HasSVE {
 		Info = useSVE
+		hasSVE = true
 	}
 }

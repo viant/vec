@@ -21,6 +21,5 @@ void magnitude_f32_sve(const float* input, uint64_t size, float* output) {
         float val = input[i];
         magnitudeSq += val * val;
     }
-
     *output = std::sqrt(magnitudeSq);
 }
