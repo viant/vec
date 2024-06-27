@@ -66,7 +66,7 @@ void cosine_distance_with_magnitudes_f32_neon(const float32_t* input1, const flo
     if (dotProduct == 0 || magnitude1 == 0 || magnitude2 == 0) {
         *output = 1.0f;
     } else {
-        *output = dotProduct / (magnitude1 * magnitude2);
+       *output = 1.0f - ( dotProduct / (magnitude1 * magnitude2));
     }
 }
 

@@ -15,7 +15,6 @@ void magnitude_f32_sve(const float* input, uint64_t size, float* output) {
     }
 
     float magnitudeSq = svaddv_f32(svptrue_b32(), magnitudeSqVec);
-
     // Handle remaining elements
     for (; i < size; ++i) {
         float val = input[i];
