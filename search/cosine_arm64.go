@@ -19,8 +19,8 @@ func _cosine_distance_f32_sve(input1, input2 unsafe.Pointer, size uint64, output
 //go:noescape
 func _cosine_distance_with_magnitude_f32_sve(input1, input2, magnitudes unsafe.Pointer, size uint64, output unsafe.Pointer)
 
-// CosineDistanceNeon calculates the cosine distance between two vectors
-func (v Float32s) CosineDistanceNeon(vec []float32) float32 {
+// cosineDistanceNeon calculates the cosine distance between two vectors
+func (v Float32s) cosineDistanceNeon(vec []float32) float32 {
 	if len(v) != len(v) {
 		return 0.0
 	}
@@ -29,8 +29,8 @@ func (v Float32s) CosineDistanceNeon(vec []float32) float32 {
 	return output
 }
 
-// CosineDistanceWithMagnitudesNeon calculates the cosine distance between two vectors with magnitudes, magnitudes are precalculated and passed as arguments
-func (v Float32s) CosineDistanceWithMagnitudesNeon(vec []float32, magnitude1, magnitude2 float32) float32 {
+// cosineDistanceWithMagnitudesNeon calculates the cosine distance between two vectors with magnitudes, magnitudes are precalculated and passed as arguments
+func (v Float32s) cosineDistanceWithMagnitudesNeon(vec []float32, magnitude1, magnitude2 float32) float32 {
 	if len(v) != len(v) {
 		return 0.0
 	}
@@ -40,8 +40,8 @@ func (v Float32s) CosineDistanceWithMagnitudesNeon(vec []float32, magnitude1, ma
 	return output
 }
 
-// CosineDistanceSVE calculates the cosine distance between two vectors
-func (v Float32s) CosineDistanceSVE(vec []float32) float32 {
+// cosineDistanceSVE calculates the cosine distance between two vectors
+func (v Float32s) cosineDistanceSVE(vec []float32) float32 {
 	if len(v) != len(v) {
 		return 0.0
 	}
@@ -50,8 +50,8 @@ func (v Float32s) CosineDistanceSVE(vec []float32) float32 {
 	return output
 }
 
-// CosineDistanceWithMagnitudesSVE calculates the cosine distance between two vectors with magnitudes, magnitudes are precalculated and passed as arguments
-func (v Float32s) CosineDistanceWithMagnitudesSVE(vec []float32, magnitude1, magnitude2 float32) float32 {
+// cosineDistanceWithMagnitudesSVE calculates the cosine distance between two vectors with magnitudes, magnitudes are precalculated and passed as arguments
+func (v Float32s) cosineDistanceWithMagnitudesSVE(vec []float32, magnitude1, magnitude2 float32) float32 {
 	if len(v) != len(v) {
 		return 0.0
 	}
@@ -64,15 +64,15 @@ func (v Float32s) CosineDistanceWithMagnitudesSVE(vec []float32, magnitude1, mag
 // CosineDistance calculates the cosine distance between two vectors
 func (v Float32s) CosineDistance(vec []float32) float32 {
 	if cpu.CanUseSVE() {
-		return v.CosineDistanceSVE(vec)
+		return v.cosineDistanceSVE(vec)
 	}
-	return v.CosineDistanceNeon(vec)
+	return v.cosineDistanceNeon(vec)
 }
 
 // CosineDistanceWithMagnitude calculates the cosine distance between two vectors, magnitudes are precalculated and passed as arguments
 func (v Float32s) CosineDistanceWithMagnitude(vec []float32, magnitude1, magnitude2 float32) float32 {
 	if cpu.CanUseSVE() {
-		return v.CosineDistanceWithMagnitudesSVE(vec, magnitude1, magnitude2)
+		return v.cosineDistanceWithMagnitudesSVE(vec, magnitude1, magnitude2)
 	}
-	return v.CosineDistanceWithMagnitudesNeon(vec, magnitude1, magnitude2)
+	return v.cosineDistanceWithMagnitudesNeon(vec, magnitude1, magnitude2)
 }
