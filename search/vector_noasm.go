@@ -1,4 +1,5 @@
-//go:build !arm64
+//go:build (!amd64 && !arm64) || noasm
+// +build !amd64,!arm64 noasm
 
 package search
 

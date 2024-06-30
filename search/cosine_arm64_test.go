@@ -4,7 +4,6 @@ package search
 
 import (
 	"github.com/viant/vec/cpu"
-	"math"
 	"testing"
 )
 
@@ -160,9 +159,4 @@ func BenchmarkVector_CosineDistanceSVE(b *testing.B) {
 	for i := 0; i < b.N; i++ {
 		Float32s(v1).cosineDistanceSVE(v2)
 	}
-}
-
-func AlmostEqual(a, b float32, maxDiscrepancy float32) bool {
-	diff := math.Abs(float64(a) - float64(b))
-	return diff >= float64(maxDiscrepancy)
 }

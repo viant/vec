@@ -3,6 +3,7 @@
 #include <cmath>
 
 
+void magnitude_f32_avx2(const float* input, uint64_t size, float* output) asm("magnitude_f32_avx2");
 void magnitude_f32_avx2(const float* input, uint64_t size, float* output) {
     __m256 magnitudeSqVec = _mm256_setzero_ps();
     uint64_t i = 0;
