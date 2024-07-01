@@ -92,7 +92,7 @@ The benchmark uses 3 sets of []uints
 
 #### ARM64 (Neon/SVE)
 
-**Apple M1**
+##### Apple M1
 
 ```text
 goos: darwin
@@ -114,7 +114,7 @@ BenchmarkAnd_M_V3_Naive-8       52957920                22.63 ns/op            0
 BenchmarkAnd_XL_V3_Naive-8      13048790                89.38 ns/op            0 B/op          0 allocs/op
 ```
 
-**Graviton 2**
+##### Graviton 2
 
 ```text
 goos: linux
@@ -136,7 +136,7 @@ BenchmarkAnd_M_V3_Naive-16      	20654671	        58.09 ns/op	       0 B/op	    
 BenchmarkAnd_XL_V3_Naive-16     	 5529211	       221.2 ns/op	       0 B/op	       0 allocs/op
 ```
 
-**Graviton 3**
+##### Graviton 3
 
 ```text
 BenchmarkAnd_S_Arm64SVE
@@ -187,7 +187,7 @@ BenchmarkAnd_XL_V3_Naive
 BenchmarkAnd_XL_V3_Naive-48     	11348571	       105.9 ns/op	       0 B/op	       0 allocs/op
 ```
 
-### AMD64 (AVX2/AVX512)
+#### AMD64 (AVX2/AVX512)
 
 **Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz**
 
