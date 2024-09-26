@@ -92,7 +92,7 @@ The benchmark uses 3 sets of []uints
 
 #### ARM64 (Neon/SVE)
 
-**Apple M1**
+##### Apple M1
 
 ```text
 goos: darwin
@@ -114,7 +114,7 @@ BenchmarkAnd_M_V3_Naive-8       52957920                22.63 ns/op            0
 BenchmarkAnd_XL_V3_Naive-8      13048790                89.38 ns/op            0 B/op          0 allocs/op
 ```
 
-**Graviton 2**
+##### Graviton 2
 
 ```text
 goos: linux
@@ -136,8 +136,58 @@ BenchmarkAnd_M_V3_Naive-16      	20654671	        58.09 ns/op	       0 B/op	    
 BenchmarkAnd_XL_V3_Naive-16     	 5529211	       221.2 ns/op	       0 B/op	       0 allocs/op
 ```
 
+##### Graviton 3
 
-### AMD64 (AVX2/AVX512)
+```text
+BenchmarkAnd_S_Arm64SVE
+BenchmarkAnd_S_Arm64SVE-48      	283087328	         4.239 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M_Arm64SVE
+BenchmarkAnd_M_Arm64SVE-48      	100000000	        10.04 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL_Arm64SVE
+BenchmarkAnd_XL_Arm64SVE-48     	41910331	        28.58 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_S_Arm64Neon
+BenchmarkAnd_S_Arm64Neon-48     	224370678	         5.349 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M_Arm64Neon
+BenchmarkAnd_M_Arm64Neon-48     	92252922	        13.00 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL_Arm64Neon
+BenchmarkAnd_XL_Arm64Neon-48    	29059210	        41.26 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V3_Neon
+BenchmarkOr_M_V3_Neon-48        	71975278	        16.66 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V4_Neon
+BenchmarkOr_M_V4_Neon-48        	53198659	        22.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V5_Neon
+BenchmarkOr_M_V5_Neon-48        	40883546	        29.32 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V3_SVE
+BenchmarkOr_M_V3_SVE-48         	95986852	        12.52 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V4_SVE
+BenchmarkOr_M_V4_SVE-48         	75589498	        15.97 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V5_SVE
+BenchmarkOr_M_V5_SVE-48         	63350295	        18.55 ns/op	       0 B/op	       0 allocs/op
+BenchmarkOr_M_V6_SVE
+BenchmarkOr_M_V6_SVE-48         	53549683	        22.27 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_S
+BenchmarkAnd_S-48               	266749639	         4.530 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M
+BenchmarkAnd_M-48               	100000000	        10.64 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL
+BenchmarkAnd_XL-48              	39472730	        30.16 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_S_Naive
+BenchmarkAnd_S_Naive-48         	223677896	         5.365 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M_Naive
+BenchmarkAnd_M_Naive-48         	60182758	        20.01 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL_Naive
+BenchmarkAnd_XL_Naive-48        	15832388	        76.02 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M_V3
+BenchmarkAnd_M_V3-48            	91067534	        13.35 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL_V3
+BenchmarkAnd_XL_V3-48           	34992511	        34.38 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_M_V3_Naive
+BenchmarkAnd_M_V3_Naive-48      	44016760	        27.25 ns/op	       0 B/op	       0 allocs/op
+BenchmarkAnd_XL_V3_Naive
+BenchmarkAnd_XL_V3_Naive-48     	11348571	       105.9 ns/op	       0 B/op	       0 allocs/op
+```
+
+#### AMD64 (AVX2/AVX512)
 
 **Intel(R) Core(TM) i9-9980HK CPU @ 2.40GHz**
 
