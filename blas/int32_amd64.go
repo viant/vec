@@ -6,6 +6,9 @@ import (
 )
 
 //go:noescape
+func (o Int32s) IncInt32(constant int32) {
+	o.incInt32(constant) // This is a fallback implementation, not a real one
+}
 
 func _add_int32(input1, input2, output unsafe.Pointer, info uint64)
 func (o Int32s) AddInt32(input1, input2 []int32) {

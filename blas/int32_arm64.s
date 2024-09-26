@@ -1,3 +1,54 @@
+TEXT ·_inc_int32(SB), $0-32
+
+   MOVD vec+0(FP),  R0
+   MOVD constant+8(FP), R1
+   MOVD size+16(FP), R2
+
+   WORD $0xd342fc48         // LSR $2, R2, R8
+   WORD $0x4e040c20         // VDUP R1, V0.S4
+   WORD $0x7100051f         // CMPW $1, R8
+   WORD $0x5400010b         // BLT 8(PC)
+   WORD $0xd3428449         // UBFX $2, R2, $32, R9
+   WORD $0xaa0003ea         // MOVD R0, R10
+   WORD $0x3dc00141         // FMOVQ (R10), F1
+   WORD $0x4ea08421         // VADD V0.S4, V1.S4, V1.S4
+   WORD $0x3c810541         // FMOVQ.P F1, 16(R10)
+   WORD $0xf1000529         // SUBS $1, R9, R9
+   WORD $0x54ffff81         // BNE -4(PC)
+   WORD $0x531e7508         // LSLW $2, R8, R8
+   WORD $0x93407d0b         // SXTW R8, R11
+   WORD $0xeb02017f         // CMP R2, R11
+   WORD $0x540003a2         // BCS 29(PC)
+   WORD $0xcb0b0049         // SUB R11, R2, R9
+   WORD $0xaa0b03e8         // MOVD R11, R8
+   WORD $0xf100413f         // CMP $16, R9
+   WORD $0x54000243         // BCC 18(PC)
+   WORD $0x927ced2a         // AND $-16, R9, R10
+   WORD $0x8b0b0148         // ADD R11, R10, R8
+   WORD $0x8b0b080b         // ADD R11<<2, R0, R11
+   WORD $0x9100816b         // ADD $32, R11, R11
+   WORD $0xaa0a03ec         // MOVD R10, R12
+   WORD $0xad7f0961         // FLDPQ -32(R11), (F1, F2)
+   WORD $0xad401163         // FLDPQ (R11), (F3, F4)
+   WORD $0x4ea08421         // VADD V0.S4, V1.S4, V1.S4
+   WORD $0x4ea08442         // VADD V0.S4, V2.S4, V2.S4
+   WORD $0x4ea08463         // VADD V0.S4, V3.S4, V3.S4
+   WORD $0x4ea08484         // VADD V0.S4, V4.S4, V4.S4
+   WORD $0xad3f0961         // FSTPQ (F1, F2), -32(R11)
+   WORD $0xac821163         // FSTPQ.P (F3, F4), 64(R11)
+   WORD $0xf100418c         // SUBS $16, R12, R12
+   WORD $0x54fffee1         // BNE -9(PC)
+   WORD $0xeb0a013f         // CMP R10, R9
+   WORD $0x54000100         // BEQ 8(PC)
+   WORD $0x8b080809         // ADD R8<<2, R0, R9
+   WORD $0xcb080048         // SUB R8, R2, R8
+   WORD $0xb940012a         // MOVWU (R9), R10
+   WORD $0x0b01014a         // ADDW R1, R10, R10
+   WORD $0xb800452a         // MOVW.P R10, 4(R9)
+   WORD $0xf1000508         // SUBS $1, R8, R8
+   WORD $0x54ffff81         // BNE -4(PC)
+   WORD $0xd65f03c0         // RET
+
 TEXT ·_add_int32(SB), $0-32
 
 	MOVD input1+0(FP),  R0
