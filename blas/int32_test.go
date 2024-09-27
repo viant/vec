@@ -12,6 +12,7 @@ var int32Data2 = make([]int32, nInts)
 var expectedIncInt32s Int32s
 var expectedAddInt32s Int32s
 var expectedSubInt32s Int32s
+var expectedScalarMulInt32s Int32s
 var expectedMulInt32s Int32s
 
 func init() {
@@ -27,6 +28,9 @@ func init() {
 	expectedIncInt32s.inc(42)
 	expectedAddInt32s.add(int32Data1[:], int32Data2[:])
 	expectedSubInt32s.sub(int32Data1[:], int32Data2[:])
+	expectedScalarMulInt32s = make([]int32, len(int32Data1))
+	copy(expectedScalarMulInt32s, int32Data1)
+	expectedScalarMulInt32s.scalarMul(10)
 	expectedMulInt32s.mul(int32Data1[:], int32Data2[:])
 }
 
@@ -45,6 +49,12 @@ func TestSubInt32(t *testing.T) {
 	out := Int32s(make([]int32, len(int32Data1)))
 	out.Sub(int32Data1[:], int32Data2[:])
 	assert.EqualValues(t, expectedSubInt32s, out, "TestSubInt32")
+}
+func TestScalarMulInt32(t *testing.T) {
+	out := Int32s(make([]int32, len(int32Data1)))
+	copy(out, int32Data1)
+	out.ScalarMul(10)
+	assert.EqualValues(t, expectedScalarMulInt32s, out, "TestScalarMulInt32")
 }
 func TestMulInt32(t *testing.T) {
 	out := Int32s(make([]int32, len(int32Data1)))
@@ -88,6 +98,19 @@ func BenchmarkSubInt32(b *testing.B) {
 	out := Int32s(make([]int32, len(int32Data1)))
 	for i := 0; i < b.N; i++ {
 		out.Sub(int32Data1[:], int32Data2[:])
+	}
+}
+
+func BenchmarkScalarMulInt32Naive(b *testing.B) {
+	out := Int32s(make([]int32, len(int32Data1)))
+	for i := 0; i < b.N; i++ {
+		out.scalarMul(42)
+	}
+}
+func BenchmarkScalarMulInt32(b *testing.B) {
+	out := Int32s(make([]int32, len(int32Data1)))
+	for i := 0; i < b.N; i++ {
+		out.ScalarMul(42)
 	}
 }
 
