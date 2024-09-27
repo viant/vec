@@ -28,7 +28,7 @@ func init() {
 	expectedMulInt64s.mul(int64Data1[:], int64Data2[:])
 }
 
-func TestAddlInt64(t *testing.T) {
+func TestAddInt64(t *testing.T) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	out.Add(int64Data1[:], int64Data2[:])
 	assert.EqualValues(t, expectedAddInt64s, out, "TestAddInt64")
@@ -74,11 +74,5 @@ func BenchmarkMulInt64Naive(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
 		out.mul(int64Data1[:], int64Data2[:])
-	}
-}
-func BenchmarkMulInt64(b *testing.B) {
-	out := Int64s(make([]int64, len(int64Data1)))
-	for i := 0; i < b.N; i++ {
-		out.Mul(int64Data1[:], int64Data2[:])
 	}
 }

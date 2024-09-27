@@ -4,7 +4,7 @@ Generating amd64 assembler files
 
 1. Upgrade clang to version 18.0.0 or later to produce automatically vectorized code.
 
-2. Generate yhe assembler file
+2. Generate the assembler file
 
 ```bash
  cd cpp
