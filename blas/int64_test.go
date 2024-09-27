@@ -23,62 +23,62 @@ func init() {
 	expectedSubInt64s = make([]int64, len(int64Data1))
 	expectedMulInt64s = make([]int64, len(int64Data1))
 	expectedDivInt64s = make([]int64, len(int64Data1))
-	expectedAddInt64s.addInt64(int64Data1[:], int64Data2[:])
-	expectedSubInt64s.subInt64(int64Data1[:], int64Data2[:])
-	expectedMulInt64s.mulInt64(int64Data1[:], int64Data2[:])
+	expectedAddInt64s.add(int64Data1[:], int64Data2[:])
+	expectedSubInt64s.sub(int64Data1[:], int64Data2[:])
+	expectedMulInt64s.mul(int64Data1[:], int64Data2[:])
 }
 
 func TestAddlInt64(t *testing.T) {
 	out := Int64s(make([]int64, len(int64Data1)))
-	out.AddInt64(int64Data1[:], int64Data2[:])
+	out.Add(int64Data1[:], int64Data2[:])
 	assert.EqualValues(t, expectedAddInt64s, out, "TestAddInt64")
 }
 func TestSubInt64(t *testing.T) {
 	out := Int64s(make([]int64, len(int64Data1)))
-	out.SubInt64(int64Data1[:], int64Data2[:])
+	out.Sub(int64Data1[:], int64Data2[:])
 	assert.EqualValues(t, expectedSubInt64s, out, "TestSubInt64")
 }
 func TestMulInt64(t *testing.T) {
 	out := Int64s(make([]int64, len(int64Data1)))
-	out.MulInt64(int64Data1[:], int64Data2[:])
+	out.Mul(int64Data1[:], int64Data2[:])
 	assert.EqualValues(t, expectedMulInt64s, out, "TestMulInt64")
 }
 
 func BenchmarkAddInt64Naive(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.addInt64(int64Data1[:], int64Data2[:])
+		out.add(int64Data1[:], int64Data2[:])
 	}
 }
 func BenchmarkAddInt64(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.AddInt64(int64Data1[:], int64Data2[:])
+		out.Add(int64Data1[:], int64Data2[:])
 	}
 }
 
 func BenchmarkSubInt64Naive(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.subInt64(int64Data1[:], int64Data2[:])
+		out.sub(int64Data1[:], int64Data2[:])
 	}
 }
 func BenchmarkSubInt64(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.SubInt64(int64Data1[:], int64Data2[:])
+		out.Sub(int64Data1[:], int64Data2[:])
 	}
 }
 
 func BenchmarkMulInt64Naive(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.mulInt64(int64Data1[:], int64Data2[:])
+		out.mul(int64Data1[:], int64Data2[:])
 	}
 }
 func BenchmarkMulInt64(b *testing.B) {
 	out := Int64s(make([]int64, len(int64Data1)))
 	for i := 0; i < b.N; i++ {
-		out.MulInt64(int64Data1[:], int64Data2[:])
+		out.Mul(int64Data1[:], int64Data2[:])
 	}
 }
