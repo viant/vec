@@ -2,6 +2,7 @@ package blas
 
 import (
 	"github.com/stretchr/testify/assert"
+	"golang.org/x/sys/cpu"
 	"testing"
 )
 
@@ -61,6 +62,24 @@ func TestMulInt32(t *testing.T) {
 	out.Mul(int32Data1[:], int32Data2[:])
 	assert.EqualValues(t, expectedMulInt32s, out, "TestMulInt32")
 }
+func TestIncInt32SVE(t *testing.T) {
+	if !cpu.ARM64.HasSVE {
+		t.Skip("ARM64.SVE not supported")
+	}
+	out := Int32s(make([]int32, len(int32Data1)))
+	copy(out, int32Data1)
+	out.IncSVE(42)
+	assert.EqualValues(t, expectedIncInt32s, out, "TestIncInt32SVE")
+}
+func TestScalarMulInt32SVE(t *testing.T) {
+	if !cpu.ARM64.HasSVE {
+		t.Skip("ARM64.SVE not supported")
+	}
+	out := Int32s(make([]int32, len(int32Data1)))
+	copy(out, int32Data1)
+	out.ScalarMulSVE(10)
+	assert.EqualValues(t, expectedScalarMulInt32s, out, "TestScalarMulInt32")
+}
 
 func BenchmarkIncInt32Naive(b *testing.B) {
 	out := Int32s(make([]int32, len(int32Data1)))
@@ -69,6 +88,15 @@ func BenchmarkIncInt32Naive(b *testing.B) {
 	}
 }
 func BenchmarkIncInt32(b *testing.B) {
+	out := Int32s(make([]int32, len(int32Data1)))
+	for i := 0; i < b.N; i++ {
+		out.Inc(42)
+	}
+}
+func BenchmarkIncInt32SVE(b *testing.B) {
+	if !cpu.ARM64.HasSVE {
+		b.Skip("ARM64.SVE not supported")
+	}
 	out := Int32s(make([]int32, len(int32Data1)))
 	for i := 0; i < b.N; i++ {
 		out.Inc(42)
@@ -111,6 +139,15 @@ func BenchmarkScalarMulInt32(b *testing.B) {
 	out := Int32s(make([]int32, len(int32Data1)))
 	for i := 0; i < b.N; i++ {
 		out.ScalarMul(42)
+	}
+}
+func BenchmarkScalarMulInt32SVE(b *testing.B) {
+	if !cpu.ARM64.HasSVE {
+		b.Skip("ARM64.SVE not supported")
+	}
+	out := Int32s(make([]int32, len(int32Data1)))
+	for i := 0; i < b.N; i++ {
+		out.ScalarMulSVE(42)
 	}
 }
 

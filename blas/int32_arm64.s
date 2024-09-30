@@ -568,3 +568,44 @@ TEXT ·_mul_int32(SB), $0-32
     WORD $0x54ffff41		// BNE -6(PC)
     WORD $0xd65f03c0		// RET
 
+TEXT ·_inc_int32_sve(SB), $0-32
+
+   MOVD vec+0(FP),  R0
+   MOVD constant+8(FP), R1
+   MOVD size+16(FP), R2
+
+  WORD $0x7100045f		// CMPW $1, R2
+  WORD $0x5400018b		// BLT 12(PC)
+  WORD $0x52800008		// MOVW $0, R8
+  WORD $0x05a03820		// ?
+  WORD $0x04a0e3e9		// ?
+  WORD $0x25a20500		// ?
+  WORD $0x93407d0a		// SXTW R8, R10
+  WORD $0xa54a4001		// ?
+  WORD $0x04800001		// ?
+  WORD $0xe54a4001		// ?
+  WORD $0x0b090108		// ADDW R9, R8, R8
+  WORD $0x6b02011f		// CMPW R2, R8
+  WORD $0x54ffff2b		// BLT -7(PC)
+  WORD $0xd65f03c0		// RET
+
+TEXT ·_scalar_mul_int32_sve(SB), $0-32
+
+   MOVD vec+0(FP),  R0
+   MOVD constant+8(FP), R1
+   MOVD size+16(FP), R2
+
+   WORD $0x7100045f		// CMPW $1, R2
+   WORD $0x5400018b		// BLT 12(PC)
+   WORD $0x52800008		// MOVW $0, R8
+   WORD $0x05a03820		// ?
+   WORD $0x04a0e3e9		// ?
+   WORD $0x25a20500		// ?
+   WORD $0x93407d0a		// SXTW R8, R10
+   WORD $0xa54a4001		// ?
+   WORD $0x04900001		// ?
+   WORD $0xe54a4001		// ?
+   WORD $0x0b090108		// ADDW R9, R8, R8
+   WORD $0x6b02011f		// CMPW R2, R8
+   WORD $0x54ffff2b		// BLT -7(PC)
+   WORD $0xd65f03c0		// RET
