@@ -29,11 +29,6 @@ func (v Float32s) cosineDistanceWithMagnitudesAvx2(vec []float32, magnitude1, ma
 	return output
 }
 
-// cosineDistanceWithMagnitudesNeon calculates the cosine distance between two vectors with magnitudes, magnitudes are precalculated and passed as arguments
-func (v Float32s) cosineDistanceWithMagnitude(vec []float32, magnitude1, magnitude2 float32) float32 {
-	return cosineDistanceWithMagnitudesAvx2(vec)
-}
-
 // CosineDistance calculates the cosine distance between two vectors
 func (v Float32s) CosineDistance(vec []float32) float32 {
 	return v.cosineDistanceAvx2(vec)
