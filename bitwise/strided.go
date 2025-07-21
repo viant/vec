@@ -36,7 +36,7 @@ func (s *Strides) ensureStrides(v Uint64s) {
 			tmp[i] = 1
 		}
 	}
-
+	tmp[0] = 0
 	*s = tmp
 }
 
@@ -47,7 +47,6 @@ func (o Uint64s) addStrided(v1, v2 Uint64s, strides Strides) {
 	j := uint32(0)
 	for i < size {
 		v := v1[i] & v2[i]
-		v1[i] = v
 		if v == 0 {
 			strides[j]++ // widen increment for NEXT visit to word j
 		}
