@@ -1,6 +1,7 @@
 package bitwise
 
 import (
+	"fmt"
 	"testing"
 )
 
@@ -30,6 +31,7 @@ func TestAndStrided(t *testing.T) {
 		},
 	}
 
+	fmt.Println("andStrided")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := make(Uint64s, len(tt.a))
@@ -37,6 +39,23 @@ func TestAndStrided(t *testing.T) {
 			strides.ensureStrides(tt.a)
 
 			out.andStrided(tt.a, tt.b, strides)
+
+			for i := range tt.expected {
+				if out[i] != tt.expected[i] {
+					t.Fatalf("word %d: got %016x, want %016x", i, out[i], tt.expected[i])
+				}
+			}
+		})
+	}
+
+	fmt.Println("AndStridedOptimized")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := make(Uint64s, len(tt.a))
+			strides := Strides{}
+			strides.ensureStrides(tt.a)
+
+			out.AndStridedOptimized(tt.a, tt.b, strides)
 
 			for i := range tt.expected {
 				if out[i] != tt.expected[i] {
@@ -73,6 +92,7 @@ func TestOrStrided(t *testing.T) {
 		},
 	}
 
+	fmt.Println("orStrided")
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			out := make(Uint64s, len(tt.a))
@@ -80,6 +100,23 @@ func TestOrStrided(t *testing.T) {
 			strides.ensureStrides(tt.a)
 
 			out.orStrided(tt.a, tt.b, strides)
+
+			for i := range tt.expected {
+				if out[i] != tt.expected[i] {
+					t.Fatalf("word %d: got %016x, want %016x", i, out[i], tt.expected[i])
+				}
+			}
+		})
+	}
+
+	fmt.Println("OrStridedOptimized")
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			out := make(Uint64s, len(tt.a))
+			strides := Strides{}
+			strides.ensureStrides(tt.a)
+
+			out.OrStridedOptimized(tt.a, tt.b, strides)
 
 			for i := range tt.expected {
 				if out[i] != tt.expected[i] {

@@ -5,6 +5,61 @@
 // Feature discriminator identical to non-strided implementation
 const uint32_t SVE = 3;
 
+// Forward declarations for SVE and NEON strided bitwise ops
+
+// === SVE strided 2-operand ===
+inline void and_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, uint32_t* control);
+inline void or_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, uint32_t* control);
+
+// === SVE strided 3-operand ===
+inline void and3_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, uint32_t* control);
+inline void or3_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, uint32_t* control);
+
+// === SVE strided 4-operand ===
+inline void and4_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, uint32_t* control);
+inline void or4_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, uint32_t* control);
+
+// === SVE strided 5-operand ===
+inline void and5_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, uint32_t* control);
+inline void or5_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, uint32_t* control);
+
+// === SVE strided 6-operand ===
+inline void and6_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, const uint64_t* v6, uint32_t* control);
+inline void or6_sve_strided(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, const uint64_t* v6, uint32_t* control);
+
+// === NEON strided 2-operand ===
+inline void and_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, uint32_t* control);
+inline void or_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, uint32_t* control);
+
+// === NEON strided 3-operand ===
+inline void and3_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, uint32_t* control);
+inline void or3_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, uint32_t* control);
+
+// === NEON strided 4-operand ===
+inline void and4_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, uint32_t* control);
+inline void or4_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, uint32_t* control);
+
+// === NEON strided 5-operand ===
+inline void and5_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, const uint64x2_t* v5, uint32_t* control);
+inline void or5_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, const uint64x2_t* v5, uint32_t* control);
+
+// === NEON strided 6-operand ===
+inline void and6_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, const uint64x2_t* v5, const uint64x2_t* v6, uint32_t* control);
+inline void or6_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64x2_t* v2, const uint64x2_t* v3, const uint64x2_t* v4, const uint64x2_t* v5, const uint64x2_t* v6, uint32_t* control);
+
+// === Scalar fallback tails  ===
+inline void and3_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void and4_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void and5_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void and6_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+
+inline void or3_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void or4_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void or5_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+inline void or6_scalar_tail(uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, const uint64_t*, uint32_t, uint32_t);
+
+// End of forward declarations
+
 // Helper: test whether all bits are zero in a 128-bit NEON register
 inline bool neon_is_zero(uint64x2_t v) {
     uint64x2_t cmp = vceqq_u64(v, vdupq_n_u64(0));
@@ -155,19 +210,21 @@ inline bool neon_is_allones(uint64x2_t v) {
 static inline bool sve_is_zero(svuint64_t v) {
     // svptest_any returns true when *any* lane has 1-bits.
     // Therefore, !svptest_any means the entire vector is zero.
-    return !svptest_any(svptrue_b64(), v);
+    svbool_t pred = svcmpne_n_u64(svptrue_b64(), v, 0);
+    return !svptest_any(svptrue_b64(), pred);
 }
 
 // Returns true if every bit of an SVE vector is one (0xFFFF_FFFF_FFFF_FFFF).
 static inline bool sve_is_allones(svuint64_t v) {
-    svbool_t all_pred = svcmpeq_n_u64(svptrue_b64(), v, ~0ULL);
-    return svptest_all(svptrue_b64(), all_pred);
+    svbool_t pred = svcmpeq_n_u64(svptrue_b64(), v, ~0ULL);
+    return !svptest_any(svptrue_b64(), svnot_z(svptrue_b64(), pred));
 }
 
 // Fallback scalar OR for remaining elements (no strides)
 inline void or_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2,
                            uint32_t start, uint32_t size) {
-    for (uint32_t i = start; i < size; ++i) {
+   #pragma clang loop vectorize(disable)
+   for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] | v2[i];
     }
 }
@@ -508,6 +565,7 @@ inline void or6_neon_strided(uint64x2_t* out, const uint64x2_t* v1, const uint64
 // Fallback scalar AND for remaining elements (no strides)
 inline void and_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2,
                             uint32_t start, uint32_t size) {
+    #pragma clang loop vectorize(disable)
     for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] & v2[i];
     }
@@ -516,6 +574,7 @@ inline void and_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v
 // Scalar tails for 3–6 operand AND/OR
 inline void and3_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3,
                              uint32_t start, uint32_t size) {
+    #pragma clang loop vectorize(disable)
     for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] & v2[i] & v3[i];
     }
@@ -523,20 +582,23 @@ inline void and3_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* 
 
 inline void and4_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4,
                              uint32_t start, uint32_t size) {
-    for (uint32_t i = start; i < size; ++i) {
+   #pragma clang loop vectorize(disable)
+   for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] & v2[i] & v3[i] & v4[i];
     }
 }
 
 inline void and5_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5,
                              uint32_t start, uint32_t size) {
-    for (uint32_t i = start; i < size; ++i) {
+    #pragma clang loop vectorize(disable)
+   for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] & v2[i] & v3[i] & v4[i] & v5[i];
     }
 }
 
 inline void and6_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, const uint64_t* v6,
                              uint32_t start, uint32_t size) {
+   #pragma clang loop vectorize(disable)
     for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] & v2[i] & v3[i] & v4[i] & v5[i] & v6[i];
     }
@@ -544,6 +606,7 @@ inline void and6_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* 
 
 inline void or3_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3,
                             uint32_t start, uint32_t size) {
+   #pragma clang loop vectorize(disable)
     for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] | v2[i] | v3[i];
     }
@@ -551,20 +614,23 @@ inline void or3_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v
 
 inline void or4_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4,
                             uint32_t start, uint32_t size) {
-    for (uint32_t i = start; i < size; ++i) {
+    #pragma clang loop vectorize(disable)
+   for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] | v2[i] | v3[i] | v4[i];
     }
 }
 
 inline void or5_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5,
                             uint32_t start, uint32_t size) {
-    for (uint32_t i = start; i < size; ++i) {
+    #pragma clang loop vectorize(disable)
+   for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] | v2[i] | v3[i] | v4[i] | v5[i];
     }
 }
 
 inline void or6_scalar_tail(uint64_t* out, const uint64_t* v1, const uint64_t* v2, const uint64_t* v3, const uint64_t* v4, const uint64_t* v5, const uint64_t* v6,
                             uint32_t start, uint32_t size) {
+   #pragma clang loop vectorize(disable)
     for (uint32_t i = start; i < size; ++i) {
         out[i] = v1[i] | v2[i] | v3[i] | v4[i] | v5[i] | v6[i];
     }
