@@ -20,7 +20,7 @@ func (o Uint64s) andV3(v1, v2, v3 Uint64s) {
 // andV4 applies v1 & v2 & v3 -> o
 func (o Uint64s) andV4(v1, v2, v3, v4 Uint64s) {
 	for i, v := range v1 {
-		o[i] = v & v2[i] & v3[i]
+		o[i] = v & v2[i] & v3[i] & v4[i]
 	}
 }
 
