@@ -12,7 +12,7 @@ import (
 func TestAnd64Sve(t *testing.T) {
 	if !cpu.CanUseSVE() {
 		fmt.Println("no sve support")
-		return
+		t.Skip()
 	}
 	length := 8
 
@@ -83,6 +83,21 @@ func BenchmarkAndProd(b *testing.B) {
 	}
 }
 
+func BenchmarkAndSveProd(b *testing.B) {
+	if !cpu.CanUseSVE() {
+		fmt.Println("no sve support")
+		b.Skip()
+	}
+	a := makeSparseVector(N, sparsity)
+	bv := makeSparseVector(N, 1.0) // fully populated
+	c := make(Uint64s, N)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		c.AndSVE(a, bv)
+	}
+}
+
 func BenchmarkAndMaskedSparseNaive(b *testing.B) {
 	a := makeSparseVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
@@ -126,7 +141,11 @@ func BenchmarkAndMaskedSparse128bitNeon(b *testing.B) {
 func BenchmarkAndMaskedSparse64bitSve(b *testing.B) {
 	if !cpu.CanUseSVE() {
 		fmt.Println("no sve support")
-		return
+		b.Skip()
+	}
+	if !cpu.CanUseSVE() {
+		fmt.Println("no sve support")
+		b.Skip()
 	}
 
 	a := makeSparseVector(N, sparsity)
