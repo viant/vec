@@ -197,10 +197,10 @@ inline void and3_strided_neon(const uint64_t *__restrict A,
 }
 
 void and3_strided(const uint64_t *__restrict A,
-                         const uint64_t *__restrict B,
-                         const uint64_t *__restrict D,  // third input
-                         uint64_t *__restrict R,        // output
-                         const uint32_t *mask) {
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict D,  // third input
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
     and3_strided_neon(A, B, D, R, mask);
 }
 
@@ -247,9 +247,362 @@ inline void or3_strided_neon(const uint64_t *__restrict A,
 }
 
 void or3_strided(const uint64_t *__restrict A,
-                         const uint64_t *__restrict B,
-                         const uint64_t *__restrict D,  // third input
-                         uint64_t *__restrict R,        // output
-                         const uint32_t *mask) {
+                 const uint64_t *__restrict B,
+                 const uint64_t *__restrict D,  // third input
+                 uint64_t *__restrict R,        // output
+                 const uint32_t *mask) {
     or3_strided_neon(A, B, D, R, mask);
 }
+
+inline void and4_strided_neon(const uint64_t *__restrict A,
+                              const uint64_t *__restrict B,
+                              const uint64_t *__restrict C,  // new third input
+                              const uint64_t *__restrict D,  // fourth input
+                              uint64_t *__restrict R,        // output
+                              const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head: handle odd starting index to keep 128-bit pairs aligned
+        if (start & 1u) {
+            R[start] = A[start] & B[start] & C[start] & D[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle: process pairs of 64-bit words as one 128-bit vector
+        const uint32_t nvec = len >> 1; // number of 128-bit vectors
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+
+            uint64x2_t t  = vandq_u64(va, vb);
+            t             = vandq_u64(t, vc);
+            uint64x2_t r  = vandq_u64(t, vd);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail: one leftover 64-bit word if len was odd
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] & B[k] & C[k] & D[k];
+        }
+    }
+}
+
+void and4_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    and4_strided_neon(A, B, C, D, R, mask);
+}
+
+inline void or4_strided_neon(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,  // new third input
+                             const uint64_t *__restrict D,  // fourth input
+                             uint64_t *__restrict R,        // output
+                             const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head: handle odd starting index to keep 128-bit pairs aligned
+        if (start & 1u) {
+            R[start] = A[start] | B[start] | C[start] | D[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle: process pairs of 64-bit words as one 128-bit vector
+        const uint32_t nvec = len >> 1; // number of 128-bit vectors
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+
+            uint64x2_t t = vorrq_u64(va, vb);
+            t            = vorrq_u64(t, vc);
+            uint64x2_t r = vorrq_u64(t, vd);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail: one leftover 64-bit word if len was odd
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] | B[k] | C[k] | D[k];
+        }
+    }
+}
+
+void or4_strided(const uint64_t *__restrict A,
+                 const uint64_t *__restrict B,
+                 const uint64_t *__restrict C,
+                 const uint64_t *__restrict D,
+                 uint64_t *__restrict R,        // output
+                 const uint32_t *mask) {
+    or4_strided_neon(A, B, C, D, R, mask);
+}
+
+inline void and5_strided_neon(const uint64_t *__restrict A,
+                              const uint64_t *__restrict B,
+                              const uint64_t *__restrict C,
+                              const uint64_t *__restrict D,
+                              const uint64_t *__restrict E,
+                              uint64_t *__restrict R,
+                              const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head
+        if (start & 1u) {
+            R[start] = A[start] & B[start] & C[start] & D[start] & E[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle
+        const uint32_t nvec = len >> 1; // number of 128-bit vectors
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+            uint64x2_t ve = vld1q_u64(E + k);
+
+            uint64x2_t t = vandq_u64(va, vb);
+            t = vandq_u64(t, vc);
+            t = vandq_u64(t, vd);
+            uint64x2_t r = vandq_u64(t, ve);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] & B[k] & C[k] & D[k] & E[k];
+        }
+    }
+}
+
+void and5_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    and5_strided_neon(A, B, C, D, E, R, mask);
+}
+
+
+inline void or5_strided_neon(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             const uint64_t *__restrict D,
+                             const uint64_t *__restrict E,
+                             uint64_t *__restrict R,
+                             const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head
+        if (start & 1u) {
+            R[start] = A[start] | B[start] | C[start] | D[start] | E[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle
+        const uint32_t nvec = len >> 1;
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+            uint64x2_t ve = vld1q_u64(E + k);
+
+            uint64x2_t t = vorrq_u64(va, vb);
+            t = vorrq_u64(t, vc);
+            t = vorrq_u64(t, vd);
+            uint64x2_t r = vorrq_u64(t, ve);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] | B[k] | C[k] | D[k] | E[k];
+        }
+    }
+}
+
+void or5_strided(const uint64_t *__restrict A,
+                 const uint64_t *__restrict B,
+                 const uint64_t *__restrict C,
+                 const uint64_t *__restrict D,
+                 const uint64_t *__restrict E,
+                 uint64_t *__restrict R,        // output
+                 const uint32_t *mask) {
+    or5_strided_neon(A, B, C, D, E, R, mask);
+}
+
+
+inline void and6_strided_neon(const uint64_t *__restrict A,
+                              const uint64_t *__restrict B,
+                              const uint64_t *__restrict C,
+                              const uint64_t *__restrict D,
+                              const uint64_t *__restrict E,
+                              const uint64_t *__restrict F,
+                              uint64_t *__restrict R,
+                              const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head
+        if (start & 1u) {
+            R[start] = A[start] & B[start] & C[start] & D[start] & E[start] & F[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle
+        const uint32_t nvec = len >> 1;
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+            uint64x2_t ve = vld1q_u64(E + k);
+            uint64x2_t vf = vld1q_u64(F + k);
+
+            uint64x2_t t = vandq_u64(va, vb);
+            t = vandq_u64(t, vc);
+            t = vandq_u64(t, vd);
+            t = vandq_u64(t, ve);
+            uint64x2_t r = vandq_u64(t, vf);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] & B[k] & C[k] & D[k] & E[k] & F[k];
+        }
+    }
+}
+
+void and6_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  const uint64_t *__restrict F,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    and6_strided_neon(A, B, C, D, E, F, R, mask);
+}
+
+
+
+inline void or6_strided_neon(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             const uint64_t *__restrict D,
+                             const uint64_t *__restrict E,
+                             const uint64_t *__restrict F,
+                             uint64_t *__restrict R,
+                             const uint32_t *mask) {
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint32_t start = spans[2 * s + 0]; // in 64-bit words
+        uint32_t len   = spans[2 * s + 1]; // in 64-bit words
+        if (len == 0) continue;
+
+        // Head
+        if (start & 1u) {
+            R[start] = A[start] | B[start] | C[start] | D[start] | E[start] | F[start];
+            ++start;
+            if (--len == 0) continue;
+        }
+
+        // Middle
+        const uint32_t nvec = len >> 1;
+        for (uint32_t v = 0; v < nvec; ++v) {
+            const uint32_t k = start + (v << 1);
+            uint64x2_t va = vld1q_u64(A + k);
+            uint64x2_t vb = vld1q_u64(B + k);
+            uint64x2_t vc = vld1q_u64(C + k);
+            uint64x2_t vd = vld1q_u64(D + k);
+            uint64x2_t ve = vld1q_u64(E + k);
+            uint64x2_t vf = vld1q_u64(F + k);
+
+            uint64x2_t t = vorrq_u64(va, vb);
+            t = vorrq_u64(t, vc);
+            t = vorrq_u64(t, vd);
+            t = vorrq_u64(t, ve);
+            uint64x2_t r = vorrq_u64(t, vf);
+
+            vst1q_u64(R + k, r);
+        }
+
+        // Tail
+        if (len & 1u) {
+            const uint32_t k = start + (nvec << 1);
+            R[k] = A[k] | B[k] | C[k] | D[k] | E[k] | F[k];
+        }
+    }
+}
+
+void or6_strided(const uint64_t *__restrict A,
+                 const uint64_t *__restrict B,
+                 const uint64_t *__restrict C,
+                 const uint64_t *__restrict D,
+                 const uint64_t *__restrict E,
+                 const uint64_t *__restrict F,
+                 uint64_t *__restrict R,        // output
+                 const uint32_t *mask) {
+    or6_strided_neon(A, B, C, D, E, F, R, mask);
+}
+
