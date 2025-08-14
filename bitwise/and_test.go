@@ -35,7 +35,7 @@ func TestAnd64Sve(t *testing.T) {
 
 }
 
-func TestAndSpanned(t *testing.T) {
+func TestAndStrided(t *testing.T) {
 
 	length := 8
 
@@ -43,9 +43,11 @@ func TestAndSpanned(t *testing.T) {
 	v1 := Uint64s{0xFF, 0x0F, 0xF0, 0x00, 0x55, 0xFF, 0x0F, 0x0F}
 	v2 := Uint64s{0x00, 0x00, 0x0F, 0xAA, 0xFF, 0x00, 0x0F, 0x00}
 
-	mask := FindNonZeroSpans(v2)
+	strides := make(Strides, 2*length+3)
+	strides.SetAndHotBlocks(v2)
+
 	out := make(Uint64s, length)
-	out.AndSpanNeon(v1, v2, mask)
+	out.AndStrided(v1, v2, strides)
 
 	expected := make(Uint64s, length)
 	for i := 0; i < length; i++ {
@@ -69,7 +71,7 @@ func makeSparseVector(n int, nonZeroFraction float64) Uint64s {
 	return vec
 }
 
-func makeZeroPrefixedVector(n int, nonZeroFraction float64) Uint64s {
+func makeZeroSuffixedVector(n int, nonZeroFraction float64) Uint64s {
 	vec := make(Uint64s, n)
 	for i := range vec {
 		if float64(i)/float64(len(vec)) < nonZeroFraction {
@@ -81,9 +83,9 @@ func makeZeroPrefixedVector(n int, nonZeroFraction float64) Uint64s {
 
 // ///////
 const N = 1 << 10
-const sparsity = 0.5 // % of elements are non-zero
+const sparsity = 0.50 // % of elements are non-zero
 func BenchmarkAndProd(b *testing.B) {
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -98,7 +100,7 @@ func BenchmarkAndSveProd(b *testing.B) {
 		fmt.Println("no sve support")
 		b.Skip()
 	}
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -110,7 +112,7 @@ func BenchmarkAndSveProd(b *testing.B) {
 
 //func BenchmarkAndMaskedSparseNaive(b *testing.B) {
 //	//a := makeSparseVector(N, sparsity)
-//	a := makeZeroPrefixedVector(N, sparsity)
+//	a := makeZeroSuffixedVector(N, sparsity)
 //	bv := makeSparseVector(N, 1.0) // fully populated
 //	c := make(Uint64s, N)
 //
@@ -137,7 +139,7 @@ func BenchmarkAndSveProd(b *testing.B) {
 //}
 
 func BenchmarkAndMaskedSparse128bitNeon(b *testing.B) {
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -150,7 +152,7 @@ func BenchmarkAndMaskedSparse128bitNeon(b *testing.B) {
 }
 
 func BenchmarkAndMaskedSparse128bitUnrolledNeon(b *testing.B) {
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -163,15 +165,29 @@ func BenchmarkAndMaskedSparse128bitUnrolledNeon(b *testing.B) {
 }
 
 func BenchmarkAndSpannedNeon(b *testing.B) {
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
-	mask := FindNonZeroSpans(a)
+	mask := FindNonZeroSpans(a) // FindHotRegions
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		c.AndSpanNeon(a, bv, mask)
+	}
+}
+
+func BenchmarkAndStrided(b *testing.B) {
+	a := makeZeroSuffixedVector(N, sparsity)
+	bv := makeSparseVector(N, 1.0) // fully populated
+	c := make(Uint64s, N)
+
+	strides := make(Strides, 2*len(a)+3)
+	strides.SetAndHotBlocks(a)
+
+	b.ResetTimer()
+	for i := 0; i < b.N; i++ {
+		c.AndStrided(a, bv, strides)
 	}
 }
 
@@ -181,7 +197,7 @@ func BenchmarkAndMaskedSparse64bitSve(b *testing.B) {
 		b.Skip()
 	}
 
-	a := makeSparseVector(N, sparsity)
+	a := makeZeroSuffixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -194,7 +210,7 @@ func BenchmarkAndMaskedSparse64bitSve(b *testing.B) {
 }
 
 //func BenchmarkAndStridedNeon(b *testing.B) {
-//	v1 := makeZeroPrefixedVector(N, sparsity)
+//	v1 := makeZeroSuffixedVector(N, sparsity)
 //	v2 := makeSparseVector(N, 1.0) // fully populated
 //	out := make(Uint64s, N)
 //
