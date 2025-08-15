@@ -1,6 +1,16 @@
 package bitwise
 
+import "github.com/viant/vec/cpu"
+
 type Strides []uint32
+
+func (s Strides) Init(n int) {
+	s[0] = uint32(n)
+	s[1] = uint32(cpu.Info >> 32)
+	s[2] = 1
+	s[3] = 0
+	s[4] = uint32(n)
+}
 
 func (o Uint64s) andStrided(v1, v2 Uint64s, strides Strides) {
 	if len(strides) < 3 {

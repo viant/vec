@@ -7,7 +7,7 @@ const uint32_t SVE = 3;
 // -----------------------------
 // 64-bit span mask builder
 // Caller sets mask[0] = N (number of 64-bit words) and ensures capacity >= 3 + 2*N
-// Produces: mask[2] = num_spans; mask[3..] = {start0,len0,start1,len1,...} in 64-bit units.
+// Produces: stride[2] = num_strides; stride[3..] = {start0,len0,start1,len1,...} in 64-bit units.
 
 void set_and_hot_blocks(const uint64_t *__restrict V,
                         uint32_t *__restrict mask) {
@@ -56,6 +56,8 @@ void set_or_hot_blocks(const uint64_t *__restrict V,
     mask[2] = num_spans;
 }
 
+
+// inline functions
 // -----------------------------
 // AND over 64-bit spans using NEON for the aligned middle and scalar head/tail.
 // Spans in mask are in 64-bit words. Unaligned addresses are OK on AArch64.
@@ -96,17 +98,6 @@ inline void and_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void and_strided(const uint64_t *__restrict A,
-                 const uint64_t *__restrict B,
-                 uint64_t *__restrict C,
-                 const uint32_t *mask) {
-    if (mask[1] == SVE) {
-        and_strided_neon(A, B, C, mask);
-    } else {
-        and_strided_neon(A, B, C, mask);
-    }
-}
-
 inline void or_strided_neon(const uint64_t *__restrict A,
                             const uint64_t *__restrict B,
                             uint64_t *__restrict C,
@@ -142,18 +133,6 @@ inline void or_strided_neon(const uint64_t *__restrict A,
         }
     }
 }
-
-void or_strided(const uint64_t *__restrict A,
-                const uint64_t *__restrict B,
-                uint64_t *__restrict C,
-                const uint32_t *mask) {
-    if (mask[1] == SVE) {
-        or_strided_neon(A, B, C, mask);
-    } else {
-        or_strided_neon(A, B, C, mask);
-    }
-}
-
 
 inline void and3_strided_neon(const uint64_t *__restrict A,
                               const uint64_t *__restrict B,
@@ -196,15 +175,6 @@ inline void and3_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void and3_strided(const uint64_t *__restrict A,
-                  const uint64_t *__restrict B,
-                  const uint64_t *__restrict D,  // third input
-                  uint64_t *__restrict R,        // output
-                  const uint32_t *mask) {
-    and3_strided_neon(A, B, D, R, mask);
-}
-
-
 inline void or3_strided_neon(const uint64_t *__restrict A,
                              const uint64_t *__restrict B,
                              const uint64_t *__restrict D,  // third input
@@ -244,14 +214,6 @@ inline void or3_strided_neon(const uint64_t *__restrict A,
             R[k] = A[k] | B[k] | D[k];
         }
     }
-}
-
-void or3_strided(const uint64_t *__restrict A,
-                 const uint64_t *__restrict B,
-                 const uint64_t *__restrict D,  // third input
-                 uint64_t *__restrict R,        // output
-                 const uint32_t *mask) {
-    or3_strided_neon(A, B, D, R, mask);
 }
 
 inline void and4_strided_neon(const uint64_t *__restrict A,
@@ -299,15 +261,6 @@ inline void and4_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void and4_strided(const uint64_t *__restrict A,
-                  const uint64_t *__restrict B,
-                  const uint64_t *__restrict C,
-                  const uint64_t *__restrict D,
-                  uint64_t *__restrict R,        // output
-                  const uint32_t *mask) {
-    and4_strided_neon(A, B, C, D, R, mask);
-}
-
 inline void or4_strided_neon(const uint64_t *__restrict A,
                              const uint64_t *__restrict B,
                              const uint64_t *__restrict C,  // new third input
@@ -351,15 +304,6 @@ inline void or4_strided_neon(const uint64_t *__restrict A,
             R[k] = A[k] | B[k] | C[k] | D[k];
         }
     }
-}
-
-void or4_strided(const uint64_t *__restrict A,
-                 const uint64_t *__restrict B,
-                 const uint64_t *__restrict C,
-                 const uint64_t *__restrict D,
-                 uint64_t *__restrict R,        // output
-                 const uint32_t *mask) {
-    or4_strided_neon(A, B, C, D, R, mask);
 }
 
 inline void and5_strided_neon(const uint64_t *__restrict A,
@@ -410,17 +354,6 @@ inline void and5_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void and5_strided(const uint64_t *__restrict A,
-                  const uint64_t *__restrict B,
-                  const uint64_t *__restrict C,
-                  const uint64_t *__restrict D,
-                  const uint64_t *__restrict E,
-                  uint64_t *__restrict R,        // output
-                  const uint32_t *mask) {
-    and5_strided_neon(A, B, C, D, E, R, mask);
-}
-
-
 inline void or5_strided_neon(const uint64_t *__restrict A,
                              const uint64_t *__restrict B,
                              const uint64_t *__restrict C,
@@ -468,17 +401,6 @@ inline void or5_strided_neon(const uint64_t *__restrict A,
         }
     }
 }
-
-void or5_strided(const uint64_t *__restrict A,
-                 const uint64_t *__restrict B,
-                 const uint64_t *__restrict C,
-                 const uint64_t *__restrict D,
-                 const uint64_t *__restrict E,
-                 uint64_t *__restrict R,        // output
-                 const uint32_t *mask) {
-    or5_strided_neon(A, B, C, D, E, R, mask);
-}
-
 
 inline void and6_strided_neon(const uint64_t *__restrict A,
                               const uint64_t *__restrict B,
@@ -531,19 +453,8 @@ inline void and6_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void and6_strided(const uint64_t *__restrict A,
-                  const uint64_t *__restrict B,
-                  const uint64_t *__restrict C,
-                  const uint64_t *__restrict D,
-                  const uint64_t *__restrict E,
-                  const uint64_t *__restrict F,
-                  uint64_t *__restrict R,        // output
-                  const uint32_t *mask) {
-    and6_strided_neon(A, B, C, D, E, F, R, mask);
-}
 
-
-
+// OR inline
 inline void or6_strided_neon(const uint64_t *__restrict A,
                              const uint64_t *__restrict B,
                              const uint64_t *__restrict C,
@@ -595,14 +506,447 @@ inline void or6_strided_neon(const uint64_t *__restrict A,
     }
 }
 
-void or6_strided(const uint64_t *__restrict A,
-                 const uint64_t *__restrict B,
-                 const uint64_t *__restrict C,
-                 const uint64_t *__restrict D,
-                 const uint64_t *__restrict E,
-                 const uint64_t *__restrict F,
-                 uint64_t *__restrict R,        // output
-                 const uint32_t *mask) {
-    or6_strided_neon(A, B, C, D, E, F, R, mask);
+/// SVE implementation
+inline void and_strided_sve(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             uint64_t *__restrict Out,
+                             const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint64_t start = spans[2*s+0];
+        uint64_t len   = spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a = A + start;
+        const uint64_t *b = B + start;
+        uint64_t *o       = Out + start;
+
+        uint64_t i = 0;
+        while (i < len) {
+            svbool_t pg = svwhilelt_b64(i, len);
+            svuint64_t va = svld1(pg, a + i);
+            svuint64_t vb = svld1(pg, b + i);
+            svuint64_t vr = svand_u64_x(pg, va, vb);
+            svst1(pg, o + i, vr);
+            i += svcntd();
+        }
+    }
 }
+
+inline void and3_strided_sve(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             uint64_t *__restrict Out,
+                             const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint64_t start = spans[2*s+0];
+        uint64_t len   = spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a = A + start, *b = B + start, *c = C + start;
+        uint64_t *o = Out + start;
+
+        uint64_t i = 0;
+        while (i < len) {
+            svbool_t pg = svwhilelt_b64(i, len);
+            svuint64_t va = svld1(pg, a + i);
+            svuint64_t vb = svld1(pg, b + i);
+            svuint64_t vc = svld1(pg, c + i);
+            svuint64_t vr = svand_u64_x(pg, svand_u64_x(pg, va, vb), vc);
+            svst1(pg, o + i, vr);
+            i += svcntd();
+        }
+    }
+}
+
+inline void and4_strided_sve(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             const uint64_t *__restrict D,
+                             uint64_t *__restrict Out,
+                             const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s = 0; s < num_spans; ++s) {
+        uint64_t start = spans[2*s+0];
+        uint64_t len   = spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start;
+        uint64_t *o = Out + start;
+
+        uint64_t i=0;
+        while (i < len) {
+            svbool_t pg = svwhilelt_b64(i, len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i);
+            svuint64_t vr = svand_u64_x(pg, svand_u64_x(pg, va, vb),
+                                            svand_u64_x(pg, vc, vd));
+            svst1(pg, o+i, vr);
+            i += svcntd();
+        }
+    }
+}
+
+inline void and5_strided_sve(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             const uint64_t *__restrict D,
+                             const uint64_t *__restrict E,
+                             uint64_t *__restrict Out,
+                             const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start,*e=E+start;
+        uint64_t *o=Out+start;
+
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i), ve=svld1(pg,e+i);
+            svuint64_t vr = svand_u64_x(pg,
+                                svand_u64_x(pg, svand_u64_x(pg, va, vb),
+                                                svand_u64_x(pg, vc, vd)),
+                                ve);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+inline void and6_strided_sve(const uint64_t *__restrict A,
+                             const uint64_t *__restrict B,
+                             const uint64_t *__restrict C,
+                             const uint64_t *__restrict D,
+                             const uint64_t *__restrict E,
+                             const uint64_t *__restrict F,
+                             uint64_t *__restrict Out,
+                             const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start,*e=E+start,*f=F+start;
+        uint64_t *o=Out+start;
+
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i);
+            svuint64_t ve=svld1(pg,e+i), vf=svld1(pg,f+i);
+            // ((A&B)&(C&D))&(E&F)
+            svuint64_t t0 = svand_u64_x(pg, va, vb);
+            svuint64_t t1 = svand_u64_x(pg, vc, vd);
+            svuint64_t t2 = svand_u64_x(pg, ve, vf);
+            svuint64_t vr = svand_u64_x(pg, svand_u64_x(pg, t0, t1), t2);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+// ---------- OR over 2..6 inputs ----------
+
+inline void or_strided_sve(const uint64_t *__restrict A,
+                            const uint64_t *__restrict B,
+                            uint64_t *__restrict Out,
+                            const uint32_t *mask)
+{
+    const uint32_t num_spans = mask[2];
+    const uint32_t *spans = &mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start; uint64_t *o=Out+start;
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vr=svorr_u64_x(pg,va,vb);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+inline void or3_strided_sve(const uint64_t *__restrict A,
+                            const uint64_t *__restrict B,
+                            const uint64_t *__restrict C,
+                            uint64_t *__restrict Out,
+                            const uint32_t *mask)
+{
+    const uint32_t num_spans=mask[2];
+    const uint32_t *spans=&mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start; uint64_t *o=Out+start;
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i), vc=svld1(pg,c+i);
+            svuint64_t vr=svorr_u64_x(pg, svorr_u64_x(pg,va,vb), vc);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+inline void or4_strided_sve(const uint64_t *__restrict A,
+                            const uint64_t *__restrict B,
+                            const uint64_t *__restrict C,
+                            const uint64_t *__restrict D,
+                            uint64_t *__restrict Out,
+                            const uint32_t *mask)
+{
+    const uint32_t num_spans=mask[2];
+    const uint32_t *spans=&mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start; uint64_t *o=Out+start;
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i);
+            svuint64_t vr=svorr_u64_x(pg, svorr_u64_x(pg,va,vb),
+                                          svorr_u64_x(pg,vc,vd));
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+inline void or5_strided_sve(const uint64_t *__restrict A,
+                            const uint64_t *__restrict B,
+                            const uint64_t *__restrict C,
+                            const uint64_t *__restrict D,
+                            const uint64_t *__restrict E,
+                            uint64_t *__restrict Out,
+                            const uint32_t *mask)
+{
+    const uint32_t num_spans=mask[2];
+    const uint32_t *spans=&mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start,*e=E+start; uint64_t *o=Out+start;
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i), ve=svld1(pg,e+i);
+            svuint64_t vr=svorr_u64_x(pg,
+                                svorr_u64_x(pg, svorr_u64_x(pg,va,vb),
+                                                svorr_u64_x(pg,vc,vd)),
+                                ve);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+inline void or6_strided_sve(const uint64_t *__restrict A,
+                            const uint64_t *__restrict B,
+                            const uint64_t *__restrict C,
+                            const uint64_t *__restrict D,
+                            const uint64_t *__restrict E,
+                            const uint64_t *__restrict F,
+                            uint64_t *__restrict Out,
+                            const uint32_t *mask)
+{
+    const uint32_t num_spans=mask[2];
+    const uint32_t *spans=&mask[3];
+
+    for (uint32_t s=0; s<num_spans; ++s) {
+        uint64_t start=spans[2*s+0], len=spans[2*s+1];
+        if (!len) continue;
+
+        const uint64_t *a=A+start,*b=B+start,*c=C+start,*d=D+start,*e=E+start,*f=F+start;
+        uint64_t *o=Out+start;
+
+        uint64_t i=0;
+        while (i<len) {
+            svbool_t pg=svwhilelt_b64(i,len);
+            svuint64_t va=svld1(pg,a+i), vb=svld1(pg,b+i);
+            svuint64_t vc=svld1(pg,c+i), vd=svld1(pg,d+i);
+            svuint64_t ve=svld1(pg,e+i), vf=svld1(pg,f+i);
+            // ((A|B)|(C|D))|(E|F)
+            svuint64_t t0 = svorr_u64_x(pg, va, vb);
+            svuint64_t t1 = svorr_u64_x(pg, vc, vd);
+            svuint64_t t2 = svorr_u64_x(pg, ve, vf);
+            svuint64_t vr = svorr_u64_x(pg, svorr_u64_x(pg, t0, t1), t2);
+            svst1(pg,o+i,vr);
+            i+=svcntd();
+        }
+    }
+}
+
+
+/// Exposed functions:
+
+/// AND
+void and_strided(const uint64_t *__restrict A,
+                 const uint64_t *__restrict B,
+                 uint64_t *__restrict C,
+                 const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        and_strided_sve(A, B, C, mask);
+    } else {
+        and_strided_neon(A, B, C, mask);
+    }
+}
+
+void and3_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict D,  // third input
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        and3_strided_sve(A, B, D, R, mask);
+    } else {
+        and3_strided_neon(A, B, D, R, mask);
+    }
+}
+
+void and4_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        and4_strided_sve(A, B, C, D, R, mask);
+    } else {
+        and4_strided_neon(A, B, C, D, R, mask);
+    }
+}
+
+void and5_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    and5_strided_neon(A, B, C, D, E, R, mask);
+    if (mask[1] == SVE) {
+        and5_strided_sve(A, B, C, D, E, R, mask);
+    } else {
+        and5_strided_neon(A, B, C, D, E, R, mask);
+    }
+}
+
+void and6_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  const uint64_t *__restrict F,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+       and6_strided_neon(A, B, C, D, E, F, R, mask);
+    } else {
+       and6_strided_neon(A, B, C, D, E, F, R, mask);
+    }
+}
+
+
+/// OR
+void or_strided(const uint64_t *__restrict A,
+                 const uint64_t *__restrict B,
+                 uint64_t *__restrict C,
+                 const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        or_strided_sve(A, B, C, mask);
+    } else {
+        or_strided_neon(A, B, C, mask);
+    }
+}
+
+void or3_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict D,  // third input
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        or3_strided_sve(A, B, D, R, mask);
+    } else {
+        or3_strided_neon(A, B, D, R, mask);
+    }
+}
+
+void or4_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        or4_strided_sve(A, B, C, D, R, mask);
+    } else {
+        or4_strided_neon(A, B, C, D, R, mask);
+    }
+}
+
+void or5_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+        or5_strided_sve(A, B, C, D, E, R, mask);
+    } else {
+        or5_strided_neon(A, B, C, D, E, R, mask);
+    }
+}
+
+void or6_strided(const uint64_t *__restrict A,
+                  const uint64_t *__restrict B,
+                  const uint64_t *__restrict C,
+                  const uint64_t *__restrict D,
+                  const uint64_t *__restrict E,
+                  const uint64_t *__restrict F,
+                  uint64_t *__restrict R,        // output
+                  const uint32_t *mask) {
+    if (mask[1] == SVE) {
+       or6_strided_sve(A, B, C, D, E, F, R, mask);
+    } else {
+       or6_strided_neon(A, B, C, D, E, F, R, mask);
+    }
+}
+
 

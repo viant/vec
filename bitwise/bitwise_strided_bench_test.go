@@ -44,7 +44,7 @@ func TestAndStrided(t *testing.T) {
 	v2 := Uint64s{0x00, 0x00, 0x0F, 0xAA, 0xFF, 0x00, 0x0F, 0x00}
 
 	strides := make(Strides, 2*length+3)
-	strides.SetAndHotBlocks(v2)
+	strides.SetActiveStrides(v2)
 
 	out := append(Uint64s(nil), v2...)
 	out.AndStrided(v1, v2, strides)
@@ -155,7 +155,7 @@ func BenchmarkAndStrided(b *testing.B) {
 	c := make(Uint64s, N)
 
 	strides := make(Strides, 2*len(a)+3)
-	strides.SetAndHotBlocks(a)
+	strides.SetActiveStrides(a)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -169,7 +169,7 @@ func BenchmarkOrStrided(b *testing.B) {
 	c := make(Uint64s, N)
 
 	strides := make(Strides, 2*len(a)+3)
-	strides.SetAndHotBlocks(a)
+	strides.SetActiveStrides(a)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
@@ -184,7 +184,7 @@ func BenchmarkOr3Strided(b *testing.B) {
 	out := make(Uint64s, N)
 
 	strides := make(Strides, 2*len(v1)+3)
-	strides.SetAndHotBlocks(v1)
+	strides.SetActiveStrides(v1)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {

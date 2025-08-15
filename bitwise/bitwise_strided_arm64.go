@@ -18,7 +18,7 @@ import (
 //go:noescape
 func _set_and_hot_blocks(v, mask unsafe.Pointer)
 
-func (s Strides) SetAndHotBlocks(set Uint64s) {
+func (s Strides) SetActiveStrides(set Uint64s) {
 	s[0] = uint32(len(set))
 	s[1] = uint32(cpu.Info >> 32)
 
