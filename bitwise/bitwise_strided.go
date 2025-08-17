@@ -12,6 +12,42 @@ func (s Strides) Init(n int) {
 	s[4] = uint32(n)
 }
 
+func (s Strides) setActiveStrides(set Uint64s) {
+	length := len(set)
+	s[0] = uint32(length)
+	s[1] = uint32(cpu.Info >> 32)
+
+	out := s[3:]
+	numSpans := 0
+
+	i := 0
+	for i < length {
+		// Skip zeros
+		for i < length && set[i] == 0 {
+			i++
+		}
+		if i == length {
+			break
+		}
+
+		// Start of a non-zero span
+		start := i
+		for i < length && set[i] != 0 {
+			i++
+		}
+
+		// Write [start, length] as uint32 pairs
+		// Ensure we have space; C++ assumes sufficient capacity.
+		if 2*numSpans+1 < len(out) {
+			out[2*numSpans+0] = uint32(start)     // start index in 64-bit words
+			out[2*numSpans+1] = uint32(i - start) // length in 64-bit words
+		}
+		numSpans++
+	}
+
+	s[2] = uint32(numSpans)
+}
+
 // AND: 2 inputs (original)
 func (o Uint64s) andStrided(v1, v2 Uint64s, strides Strides) {
 	numSpans := strides[2]

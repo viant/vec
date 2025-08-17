@@ -1,5 +1,9 @@
 package bitwise
 
+func (s Strides) SetActiveStrides(set Uint64s) {
+	s.setActiveStrides(set)
+}
+
 // =======================
 // AND
 // =======================
