@@ -1,6 +1,3 @@
-//go:build arm64 && !noasm && !appengine
-// +build arm64,!noasm,!appengine
-
 package bitwise
 
 import (
@@ -115,18 +112,6 @@ func (o Uint64s) And6Strided(v1, v2, v3, v4, v5, v6 Uint64s, strides Strides) {
 
 // Hot blocks
 //
-//go:noescape
-func _set_or_hot_blocks(v, mask unsafe.Pointer)
-
-func (s Strides) SetOrHotBlocks(set Uint64s) {
-	s[0] = uint32(len(set))
-	s[1] = uint32(cpu.Info >> 32)
-
-	_set_or_hot_blocks(
-		unsafe.Pointer(&set[0]),
-		unsafe.Pointer(&s[0]),
-	)
-}
 
 // 2 args
 // Decls match the TEXT headers (order: v..., out, control).

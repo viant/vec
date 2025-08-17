@@ -64,11 +64,11 @@ func TestOrStrided(t *testing.T) {
 	length := 8
 
 	// Allocate input vectors
-	v1 := Uint64s{^uint64(0), 0x0F, 0xF0, 0x00, 0x55, ^uint64(0), 0x0F, 0x0F}
+	v1 := Uint64s{0x01, 0x0F, 0xF0, 0x00, 0x55, 0x02, 0x0F, 0x0F}
 	v2 := Uint64s{0x00, 0x00, 0x0F, 0xAA, 0xFF, 0x00, 0x0F, 0x00}
 
 	strides := make(Strides, 2*length+3)
-	strides.SetOrHotBlocks(v1)
+	strides.SetActiveStrides(v2)
 
 	out := append(Uint64s(nil), v1...)
 	out.OrStrided(v1, v2, strides)
@@ -164,7 +164,7 @@ func BenchmarkAndStrided(b *testing.B) {
 }
 
 func BenchmarkOrStrided(b *testing.B) {
-	a := makeOnePrefixedVector(N, sparsity)
+	a := makeZeroPrefixedVector(N, sparsity)
 	bv := makeSparseVector(N, 1.0) // fully populated
 	c := make(Uint64s, N)
 
@@ -174,20 +174,5 @@ func BenchmarkOrStrided(b *testing.B) {
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
 		c.OrStrided(a, bv, strides)
-	}
-}
-
-func BenchmarkOr3Strided(b *testing.B) {
-	v1 := makeOnePrefixedVector(N, sparsity)
-	v2 := makeSparseVector(N, 1.0) // fully populated
-	v3 := makeSparseVector(N, 1.0) // fully populated
-	out := make(Uint64s, N)
-
-	strides := make(Strides, 2*len(v1)+3)
-	strides.SetActiveStrides(v1)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		out.Or3Strided(v1, v2, v3, strides)
 	}
 }
