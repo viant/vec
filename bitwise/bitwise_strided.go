@@ -1,93 +1,226 @@
 package bitwise
 
-var allOnes = ^uint64(0)
+import (
+	"fmt"
 
-// Strides semantics used by *andStrided* and *orStrided*:
-//   - strides[0] — absolute index at which a scan starts.
-//   - strides[j] (j>0) — increment applied after processing word j-1.
-//
-// Increment growth rules
-//
-//	AND : strides[j]++ when word j collapses to zero (all bits = 0).
-//	OR  : strides[j]++ when word j becomes fully saturated (all bits = 1).
-//
-// Saturation indicates that further applications of the same bitwise
-// operation cannot change the value, therefore the algorithm can safely
-// skip farther on subsequent passes.
-//
-// We keep it as []uint32 because increments seldom exceed 32‑bit range.
+	"github.com/viant/vec/cpu"
+)
+
 type Strides []uint32
 
-var initStrides = make([]uint32, 1024)
-
-func init() {
-
-	for i := 0; i < len(initStrides); i++ {
-		initStrides[i] = 1
-	}
-}
-
-// ensureStrides makes sure s has at least len(v)+1 entries,
-// initializing every entry to 1 except the first.
-func (s *Strides) ensureStrides(v Uint64s) {
-	n := len(v) + 1
-	if len(*s) == n {
+func (s Strides) Init(n int) {
+	// Guard to avoid panics if called with too-small slices.
+	if len(s) < 5 {
+		fmt.Errorf("Strides.Init: expected at least 5 elements, got %d", len(s))
 		return
 	}
-	tmp := make(Strides, n)
-
-	// Efficient copy from initStrides buffer
-	if n <= len(initStrides) {
-		copy(tmp, initStrides[:n])
-	} else {
-		copy(tmp, initStrides)
-		for i := len(initStrides); i < n; i++ {
-			tmp[i] = 1
-		}
-	}
-	tmp[0] = 0
-	*s = tmp
+	s[0] = uint32(n)
+	s[1] = uint32(cpu.Info >> 32)
+	s[2] = 1
+	s[3] = 0
+	s[4] = uint32(n)
 }
 
-// And applies v1 & v2 -> o
-// andStrided applies bitwise AND with dynamic stride adjustment.
-//
-// A stride is widened (i.e. strides[j]++) when the AND result at word j
-// equals allOnes (0xFFFF_FFFF_FFFF_FFFF). The rationale is that once all
-// bits are set at position j, any further AND with another vector will keep
-// this word saturated, so subsequent passes can safely skip farther.
-//
-// NOTE: Earlier implementation widened the stride when the result collapsed
-// to zero. The semantics changed so that *all bits set* triggers the
-// widening instead.
+func (s Strides) Clear(n int) {
+	if len(s) < 5 {
+		fmt.Errorf("Strides.Clear: expected at least 5 elements, got %d", len(s))
+		return
+	}
+	clear(s)
+}
+
+func (s Strides) setActiveStrides(set Uint64s) {
+	length := len(set)
+	s[0] = uint32(length)
+	s[1] = uint32(cpu.Info >> 32)
+
+	out := s[3:]
+	numSpans := 0
+
+	i := 0
+	for i < length {
+		// Skip zeros
+		for i < length && set[i] == 0 {
+			i++
+		}
+		if i == length {
+			break
+		}
+
+		// Start of a non-zero span
+		start := i
+		for i < length && set[i] != 0 {
+			i++
+		}
+
+		// Write [start, length] as uint32 pairs
+		// Ensure we have space; C++ assumes sufficient capacity.
+		if 2*numSpans+1 < len(out) {
+			out[2*numSpans+0] = uint32(start)     // start index in 64-bit words
+			out[2*numSpans+1] = uint32(i - start) // length in 64-bit words
+		}
+		numSpans++
+	}
+
+	s[2] = uint32(numSpans)
+}
+
+// AND: 2 inputs (original)
 func (o Uint64s) andStrided(v1, v2 Uint64s, strides Strides) {
-	size := uint32(len(v1))
-	i := strides[0]
-	j := uint32(0)
-	for i < size {
-		v := v1[i] & v2[i]
-		if v == 0 {
-			strides[j]++ // widen increment for NEXT visit to word j
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] & v2[i]
 		}
-		o[i] = v
-		j++
-		i += strides[j] // jump by increment stored at the NEXT slot
 	}
 }
 
-// Or applies v1 | v2 -> o with strided evaluation and dynamic stride adjustment.
-func (o Uint64s) orStrided(v1, v2 Uint64s, strides Strides) {
-	size := uint32(len(v1))
-	i := strides[0]
-	j := uint32(0)
+// AND: 3 inputs
+func (o Uint64s) and3Strided(v1, v2, v3 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
 
-	for i < size {
-		v := v1[i] | v2[i]
-		if v == allOnes {
-			strides[j]++ // widen next stride if fully saturated
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] & v2[i] & v3[i]
 		}
-		o[i] = v
-		j++
-		i += strides[j] // use updated stride for next jump
+	}
+}
+
+// AND: 4 inputs
+func (o Uint64s) and4Strided(v1, v2, v3, v4 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] & v2[i] & v3[i] & v4[i]
+		}
+	}
+}
+
+// AND: 5 inputs
+func (o Uint64s) and5Strided(v1, v2, v3, v4, v5 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] & v2[i] & v3[i] & v4[i] & v5[i]
+		}
+	}
+}
+
+// AND: 6 inputs
+func (o Uint64s) and6Strided(v1, v2, v3, v4, v5, v6 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] & v2[i] & v3[i] & v4[i] & v5[i] & v6[i]
+		}
+	}
+}
+
+// OR: 2 inputs
+func (o Uint64s) orStrided(v1, v2 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] | v2[i]
+		}
+	}
+}
+
+// OR: 3 inputs
+func (o Uint64s) or3Strided(v1, v2, v3 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] | v2[i] | v3[i]
+		}
+	}
+}
+
+// OR: 4 inputs
+func (o Uint64s) or4Strided(v1, v2, v3, v4 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] | v2[i] | v3[i] | v4[i]
+		}
+	}
+}
+
+// OR: 5 inputs
+func (o Uint64s) or5Strided(v1, v2, v3, v4, v5 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] | v2[i] | v3[i] | v4[i] | v5[i]
+		}
+	}
+}
+
+// OR: 6 inputs
+func (o Uint64s) or6Strided(v1, v2, v3, v4, v5, v6 Uint64s, strides Strides) {
+	numSpans := strides[2]
+	spans := strides[3:]
+
+	for s := uint32(0); s < numSpans; s++ {
+		start := int(spans[2*s+0])
+		length := int(spans[2*s+1])
+		end := start + length
+
+		for i := start; i < end; i++ {
+			o[i] = v1[i] | v2[i] | v3[i] | v4[i] | v5[i] | v6[i]
+		}
 	}
 }

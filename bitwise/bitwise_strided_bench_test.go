@@ -1,66 +1,135 @@
-//go:build arm64 && !noasm
-
 package bitwise
 
 import (
 	"math/rand"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
-const (
-	dataSize = 1024 * 1024 // 1 million elements for realistic benchmark
-)
+func TestAndStrided(t *testing.T) {
 
-// generateTestData initializes Uint64 slices with pseudo-random values.
-func generateTestData(size int) (Uint64s, Uint64s, Uint64s) {
-	v1 := make(Uint64s, size)
-	v2 := make(Uint64s, size)
-	out := make(Uint64s, size)
-	for i := 0; i < size; i++ {
-		v1[i] = rand.Uint64()
-		v2[i] = rand.Uint64()
+	length := 8
+
+	// Allocate input vectors
+	v1 := Uint64s{0xFF, 0x0F, 0xF0, 0x00, 0x55, 0xFF, 0x0F, 0x0F}
+	v2 := Uint64s{0x00, 0x00, 0x0F, 0xAA, 0xFF, 0x00, 0x0F, 0x00}
+
+	strides := make(Strides, 2*length+3)
+	strides.SetActiveStrides(v2)
+
+	out := append(Uint64s(nil), v2...)
+	out.AndStrided(v1, v2, strides)
+
+	expected := make(Uint64s, length)
+	for i := 0; i < length; i++ {
+		expected[i] = v1[i] & v2[i]
 	}
-	return out, v1, v2
+
+	// Validate result
+	assert.Equal(t, expected, out, "AndStrided output mismatch")
+
 }
 
-func BenchmarkAnd(b *testing.B) {
-	out, v1, v2 := generateTestData(dataSize)
+func TestOrStrided(t *testing.T) {
+
+	length := 8
+
+	// Allocate input vectors
+	v1 := Uint64s{0x01, 0x0F, 0xF0, 0x00, 0x55, 0x02, 0x0F, 0x0F}
+	v2 := Uint64s{0x00, 0x00, 0x0F, 0xAA, 0xFF, 0x00, 0x0F, 0x00}
+
+	strides := make(Strides, 2*length+3)
+	strides.SetActiveStrides(v2)
+
+	out := append(Uint64s(nil), v1...)
+	out.OrStrided(v1, v2, strides)
+
+	expected := make(Uint64s, length)
+	for i := 0; i < length; i++ {
+		expected[i] = v1[i] | v2[i]
+	}
+
+	// Validate result
+	assert.Equal(t, expected, out, "OrStrided output mismatch")
+
+}
+
+//////////
+
+func makeSparseVector(n int, nonZeroFraction float64) Uint64s {
+	vec := make(Uint64s, n)
+	for i := range vec {
+		if rand.Float64() < nonZeroFraction {
+			vec[i] = rand.Uint64()
+		}
+	}
+	return vec
+}
+
+func makeZeroPrefixedVector(n int, fraction float64) Uint64s {
+	vec := make(Uint64s, n)
+	for i := range vec {
+		if float64(i)/float64(len(vec)) < fraction {
+			vec[i] = 0
+		} else {
+			vec[i] = ^uint64(0)
+		}
+	}
+	return vec
+}
+
+//func makeOnePrefixedVector(n int, fraction float64) Uint64s {
+//	vec := make(Uint64s, n)
+//	for i := range vec {
+//		if float64(i)/float64(len(vec)) < fraction {
+//			vec[i] = ^uint64(0)
+//
+//		} else {
+//			vec[i] = 0
+//		}
+//	}
+//	return vec
+//}
+
+// ///////
+const N = 1 << 10
+const sparsity = 0.50 // % of elements are non-zero
+func BenchmarkAndProd(b *testing.B) {
+	a := makeZeroPrefixedVector(N, sparsity)
+	bv := makeSparseVector(N, 1.0) // fully populated
+	c := make(Uint64s, N)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		out.And(v1, v2)
+		c.And(a, bv)
 	}
 }
 
-func BenchmarkAndStridedOptimized(b *testing.B) {
-	out, v1, v2 := generateTestData(dataSize)
-	strides := Strides{}
-	strides.ensureStrides(v1)
+func BenchmarkAndStrided(b *testing.B) {
+	a := makeZeroPrefixedVector(N, sparsity)
+	bv := makeSparseVector(N, 1.0) // fully populated
+	c := make(Uint64s, N)
+
+	strides := make(Strides, 2*len(a)+3)
+	strides.SetActiveStrides(a)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		//strideCopy := append(Strides(nil), strides...)
-		out.AndStridedOptimized(v1, v2, strides)
+		c.AndStrided(a, bv, strides)
 	}
 }
 
-func BenchmarkOr(b *testing.B) {
-	out, v1, v2 := generateTestData(dataSize)
+func BenchmarkOrStrided(b *testing.B) {
+	a := makeZeroPrefixedVector(N, sparsity)
+	bv := makeSparseVector(N, 1.0) // fully populated
+	c := make(Uint64s, N)
+
+	strides := make(Strides, 2*len(a)+3)
+	strides.SetActiveStrides(a)
 
 	b.ResetTimer()
 	for i := 0; i < b.N; i++ {
-		out.Or(v1, v2)
-	}
-}
-
-func BenchmarkOrStridedOptimized(b *testing.B) {
-	out, v1, v2 := generateTestData(dataSize)
-	strides := Strides{}
-	strides.ensureStrides(v1)
-
-	b.ResetTimer()
-	for i := 0; i < b.N; i++ {
-		//strideCopy := append(Strides(nil), strides...)
-		out.OrStridedOptimized(v1, v2, strides)
+		c.OrStrided(a, bv, strides)
 	}
 }
