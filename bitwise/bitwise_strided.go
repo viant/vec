@@ -1,15 +1,32 @@
 package bitwise
 
-import "github.com/viant/vec/cpu"
+import (
+	"fmt"
+
+	"github.com/viant/vec/cpu"
+)
 
 type Strides []uint32
 
 func (s Strides) Init(n int) {
+	// Guard to avoid panics if called with too-small slices.
+	if len(s) < 5 {
+		fmt.Errorf("Strides.Init: expected at least 5 elements, got %d", len(s))
+		return
+	}
 	s[0] = uint32(n)
 	s[1] = uint32(cpu.Info >> 32)
 	s[2] = 1
 	s[3] = 0
 	s[4] = uint32(n)
+}
+
+func (s Strides) Clear(n int) {
+	if len(s) < 5 {
+		fmt.Errorf("Strides.Clear: expected at least 5 elements, got %d", len(s))
+		return
+	}
+	clear(s)
 }
 
 func (s Strides) setActiveStrides(set Uint64s) {
