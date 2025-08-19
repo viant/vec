@@ -14,6 +14,7 @@ func (s Strides) Init(n int) {
 		fmt.Errorf("Strides.Init: expected at least 5 elements, got %d", len(s))
 		return
 	}
+	clear(s)
 	s[0] = uint32(n)
 	s[1] = uint32(cpu.Info >> 32)
 	s[2] = 1
